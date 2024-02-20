@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const validator = require("mongoose-unique-validator");
-const adminScheam = mongoose.Schema(
+const admin_schema = mongoose.Schema(
   {
     email: {
       type: String,
@@ -35,12 +35,16 @@ const adminScheam = mongoose.Schema(
       type: String,
       default: "",
     },
-    date_created: {
-      type: Date,
-      default: "",
+    name: {
+      type: String,
+      required: true,
     },
   },
   {
     timestamps: true,
   }
 );
+
+admin_schema.plugin(unique_validator);
+
+module.exports = mongoose.model("admin", admin_schema);

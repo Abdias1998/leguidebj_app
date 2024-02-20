@@ -12,6 +12,8 @@ const sendEmail_request = require(`../../../utils/send.email`);
 const sendEmail = sendEmail_request.send_email;
 
 const jwt = require("jsonwebtoken");
+const { formatDate, generateCode } = require("../../../utils/hook");
+const now = new Date(); // Récupérez la date et l'heure actuelle
 
 // 1-Inscription de l'admin principal
 module.exports.register_Admin_Principal = async_handler(async (req, res) => {
@@ -19,26 +21,26 @@ module.exports.register_Admin_Principal = async_handler(async (req, res) => {
 
   //Inscrit l'admin si seulement les identifiants fixé sont juste
 
-  if (process.env.userAdmin !== email || process.env.telAdmin !== tel) {
+  if (email !== process.env.userAdmin || tel !== process.env.telAdmin) {
     return res.status(401).json({
-      message: "Vous n'ètes pas autorisé à vous inscrire en tant que admin",
+      message: "Erreur d'inscription procédure",
     });
   }
 
   //   Vérifiez si le mot de passe est juste
-  if (process.env.passAdmin !== password) {
+  if (password !== process.env.passAdmin) {
     return res.status(401).json({
-      message: "Vous n'ètes pas autorisé à vous inscrire en tant que admin",
+      message: "Erreur d'inscription procédure !",
     });
   }
 
   // Verifier si les données saisit sont valide et non vide
   if (!validator.isEmail(email))
     return res.status(401).json({ message: "Saisissez un mail valide" });
-  if (!validator.isLength(password, { min: 4, max: 15 }))
+  if (!validator.isLength(password, { min: 8, max: 30 }))
     return res.status(401).json({
       message:
-        "La longeur de caractère du mot de passe doit être comprise entre 2 et 15",
+        "La longeur de caractère du mot de passe doit être comprise entre 8 et 30",
     });
   if (!validator.isLength(tel, { min: 8, max: 8 }))
     return res.status(401).json({
@@ -56,28 +58,13 @@ module.exports.register_Admin_Principal = async_handler(async (req, res) => {
   // Renvoyer une erreur 403 si l'email ou le tel est trouver
   if (admin)
     return res.status(403).json({
-      message: `L'admin avec cet email ou tel existe déja, veuillez-vous connectez`,
+      message: `L'admin existe`,
     });
 
   // Crypter le mot de passe
   const hashed_password = bcrypt.hashSync(password, 10);
 
   try {
-    // Lire le template pour confirmer que c'est bien son email
-    fs.readFile(
-      "./html/admin/register_Email_Admin.html",
-      "utf-8",
-      async (err, data) => {
-        if (err)
-          return res.status(401).json({
-            message: `Erreur lors du lecture du fichier d'envoi du mail ${err}`,
-          });
-        else {
-          await send_email(email, `Inscription de l'admin `, html);
-        }
-      }
-    );
-
     //   Enrégistrer l'utilisateur
     const admin = await new Admin({
       email,
@@ -85,6 +72,7 @@ module.exports.register_Admin_Principal = async_handler(async (req, res) => {
       password: hashed_password,
       isAdmin: true,
       role: "admin_principal",
+      name: `Admin_${0 + generateCode()}`,
     });
     admin.save();
     return res.status(200).json({
@@ -103,63 +91,33 @@ module.exports.register_Admin_Role = async_handler(async (req, res) => {
   /*Vérifiez si c'est l'admin qui crée l'utilisateur*/
   let admin;
   if (!ObjectdId.isValid(req.params.id)) {
-    return res
-      .status(400)
-      .json({ message: `L'identifiant n'existe pas ${req.params.id} ` });
+    return res.status(400).json({ message: `No authorize ${req.params.id} ` });
   }
-  admin = await User.findById({ _id: req.params.id });
+  admin = await Admin.findById({ _id: req.params.id });
 
   if (!admin)
     return res.status(400).json({
-      message: "L'identifiant n'existe pas ",
+      message: "No authorize ",
     });
 
-  if (admin.role !== "admin_principal")
+  if (!admin || admin.role !== "admin_principal")
     return res.status(400).json({
-      message: "Vous n'êtes pas autorisé à crée un admin",
+      message: "Vous n'êtes pas autorisé à crée un autre admin",
     });
-  const now = new Date(); // Récupérez la date et l'heure actuelle
-
-  function formatDate(date) {
-    const options = {
-      timeZone: "Africa/Porto-Novo", // Fuseau horaire de l'Afrique de l'Ouest (Bénin)
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    };
-
-    return date.toLocaleString("fr-FR", options);
-  }
 
   // Crypter le mot de passe
   const hashed_password = bcrypt.hashSync(password, 10);
+  /**Génerer un code à 4 chiffre ou le premier chiffre doit obligatoirement être un 0 */
 
   //   Enrégistrer l'utilisateur
   try {
-    // Lire le template pour confirmer que c'est bien son email
-    fs.readFile(
-      "./html/admin/register_Email_Admin_Role.html",
-      "utf-8",
-      async (err, data) => {
-        if (err)
-          return res.status(401).json({
-            message: `Erreur lors du lecture du fichier d'envoi du mail ${err}`,
-          });
-        else {
-          await sendEmail(email, `Inscription de l'admin `, html);
-        }
-      }
-    );
-
     const admin_role = await new Admin({
       email,
       tel,
       password: hashed_password,
       isAdmin: true,
       role,
-      date_created: formatDate(now),
+      name: `compte_${0 + generateCode()}`,
     });
     admin_role.save();
     return res.status(200).json({
@@ -199,27 +157,25 @@ module.exports.login_Admin = async_handler(async (req, res) => {
     .then((user) => {
       if (!user)
         return res.status(401).json({
-          message: `Vous n'avez pas de compte avec ces informations d'identification, veuillez vous inscrire en premier.`,
+          message: `Vous n'avez pas de compte admin avec ces informations d'identification, veuillez vous inscrire en premier.`,
         });
       /*Vérifiez si quelqu'un à déja initialisé un changement de mot de passe */
-      // if (user.resetPasswordExpires !== null)
-      //   return res.status(401).json({
-      //     message: `Veuillez changer votre mot de passe pour des raisons de sécurité si vous n'êtes pas l'auteur de la
+      if (user.reset_password_expires_Admin !== null)
+        return res.status(401).json({
+          message: `Veuillez changer votre mot de passe pour des raisons de sécurité si vous n'êtes pas l'auteur de la
 
-      //     procédure de changement du mot de passe du ${dateFormat(
-      //       user.resetPasswordExpires
-      //     )}`,
-      //   });
+          procédure de changement du mot de passe du ${dateFormat(
+            user.reset_password_expires_Admin
+          )}`,
+        });
 
       /* 3 - Décrypter le mot de passe avant de le vérifiez avec celle de la base de donnée qvec bcrypt*/
       const passwordHashed = bcrypt.compareSync(password, user.password);
       if (!passwordHashed) {
-        return res
-          .status(401)
-          .json({ message: `Votre mot de passe est incorrect.` });
+        return res.status(401).json({ message: `Mot de passe incorrect.` });
       }
       /**Authentifer l'user dans le cookie avec son id personnel */
-      const token = jwt.sign({ id: user._id }, process.env.TOKEN_SECRETE, {
+      const token = jwt.sign({ id: user._id }, process.env.token_auth_admin, {
         expiresIn: `7d` /**Duréé maximum de vie du token */,
       });
 
@@ -289,7 +245,7 @@ module.exports.forget_password_admin = async_handler(async (req, res) => {
         return res.status(401).json({ message: err });
       } else {
         const html = data
-          .replace(/{name}/g, existingAdmin.date_created)
+          .replace(/{name}/g, existingAdmin.name)
           .replace(/{reset_link}/g, url);
 
         sendEmail(
@@ -299,7 +255,6 @@ module.exports.forget_password_admin = async_handler(async (req, res) => {
         );
       }
     });
-    /**Envoi du lien sur son numéro de téléphone */
   } catch (error) {
     res
       .status(500)
@@ -326,9 +281,10 @@ module.exports.reset_password_admin = async_handler(async (req, res) => {
       return res.status(401).json({
         message: `Le champ mot de passe est vide`,
       });
-    if (!validator.isLength(newPass, { min: 5, max: 15 }))
+
+    if (!validator.isLength(newPass, { min: 8, max: 30 }))
       return res.status(401).json({
-        message: `Votre nouveau mot de passe doit contenir au moins 6 caractères`,
+        message: `Votre nouveau mot de passe doit contenir au moins 8 caractères`,
       });
     /**Verifie si le token est celle que nous avons générer avec un key forget_password_key  */
     const decoded = jwt.verify(
@@ -366,5 +322,55 @@ module.exports.reset_password_admin = async_handler(async (req, res) => {
   return res.status(200).json({
     message:
       "Votre mot de passe a été changé avec succès. Veuillez-vous connectez à présent avec le nouveau mot de passe.",
+  });
+});
+
+//6- Déconnexion de la session
+module.exports.logout_session_admin = async_handler(async (req, res) => {
+  /**Récuperer le cookie */
+  const cookies = req.headers.cookie;
+  const preventToken = cookies?.split(`=`)[1];
+  if (!preventToken) {
+    return res
+      .status(404)
+      .json({ message: `Déconnexion échouée, veuillez réessayer plus tard` });
+  }
+  /**Vérifez si l'utilisateur est connecté avec le cookie stocké dans le navigateur */
+  jwt.verify(String(preventToken), process.env.token_auth_admin, (err) => {
+    if (err) {
+      return res
+        .status(400)
+        .json({ message: `Authentification échoué ${err}` });
+    }
+    // res.clearCookie(`leguidebj_admin`);
+    // req.cookies = req.cookies || {};
+    // req.cookies[`leguidebj_admin`] = ``;
+    /**Réponse finale */
+    return res.status(200).json({ message: `Déconnexion` });
+  });
+});
+
+//7-Déconnexion de la plateforme
+module.exports.logout = async_handler(async (req, res) => {
+  /**Récuperer le cookie */
+  const cookies = req.headers.cookie;
+  const preventToken = cookies?.split(`=`)[1];
+  if (!preventToken) {
+    return res
+      .status(404)
+      .json({ message: `Déconnexion échouée, veuillez réessayer plus tard` });
+  }
+  /**Vérifez si l'utilisateur est connecté avec le cookie stocké dans le navigateur */
+  jwt.verify(String(preventToken), process.env.token_auth_admin, (err) => {
+    if (err) {
+      return res
+        .status(400)
+        .json({ message: `Authentification échoué ${err}` });
+    }
+    res.clearCookie(`leguidebj_admin`);
+    req.cookies = req.cookies || {};
+    req.cookies[`leguidebj_admin`] = ``;
+    /**Réponse finale */
+    return res.status(200).json({ message: `Déconnexion` });
   });
 });
