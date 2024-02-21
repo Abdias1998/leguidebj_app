@@ -1,5 +1,7 @@
+/* global process */
+
 const nodemailer = require("nodemailer");
-const path = require("path");
+// const path = require("path");
 const transporter = nodemailer.createTransport({
   host: process.env.host,
   service: process.env.service,
