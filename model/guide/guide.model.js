@@ -102,6 +102,6 @@ const guide_schema = mongoose.Schema(
   }
 );
 
-guide_schema.plugin(unique_validator);
+guide_schema.plugin(validator);
 
 module.exports = mongoose.model("guide", guide_schema);

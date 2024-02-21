@@ -1,5 +1,3 @@
-function formatDate(date) {}
-
 module.exports.formatDate = async (date) => {
   const options = {
     timeZone: "Africa/Porto-Novo", // Fuseau horaire de l'Afrique de l'Ouest (Bénin)

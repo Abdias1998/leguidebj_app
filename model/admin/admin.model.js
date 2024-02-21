@@ -45,6 +45,6 @@ const admin_schema = mongoose.Schema(
   }
 );
 
-admin_schema.plugin(unique_validator);
+admin_schema.plugin(validator);
 
 module.exports = mongoose.model("admin", admin_schema);

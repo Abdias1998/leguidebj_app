@@ -6,8 +6,8 @@ const async_handler = require(`express-async-handler`);
 /* global process */
 
 const mongoose = require("mongoose");
-const { setAllMajWords } = require("../../utils/hook");
-
+const { setAllMajWords } = require("../../../utils/hook");
+const validator = require("validator");
 const ObjectdId = mongoose.Types.ObjectId;
 
 //1-Inscription des guides

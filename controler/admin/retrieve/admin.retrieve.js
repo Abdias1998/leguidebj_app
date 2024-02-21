@@ -1,14 +1,15 @@
-/* global process */
-/* global __dirname */
+// /* global process */
+// /* global __dirname */
 const Admin = require("../../../model/admin/admin.model");
 const validator = require("validator");
 const async_handler = require("express-async-handler");
-const bcrypt = require("bcrypt");
-const fs = require("fs");
-const crypto = require("crypto");
-const { send_email } = require("../../../utils/send.email");
-const jwt = require("jsonwebtoken");
-
+// const bcrypt = require("bcrypt");
+// const fs = require("fs");
+// const crypto = require("crypto");
+// const { send_email } = require("../../../utils/send.email");
+// const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
+const ObjectdId = mongoose.Types.ObjectId;
 //1- Récuperer touts les admins
 module.exports.get_all_admin = async_handler(async (req, res) => {
   /**Recuperer avec la méthode find de mongoose sans les mots de passe */

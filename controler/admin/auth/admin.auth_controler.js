@@ -1,19 +1,18 @@
 /* global process */
-/* global __dirname */
+// /* global __dirname */
 
 const Admin = require("../../../model/admin/admin.model");
 const validator = require("validator");
 const async_handler = require("express-async-handler");
 const bcrypt = require("bcrypt");
+const mongoose = require("mongoose");
 const fs = require("fs");
-const crypto = require("crypto");
 const sendEmail_request = require(`../../../utils/send.email`);
-
+const ObjectdId = mongoose.Types.ObjectId;
 const sendEmail = sendEmail_request.send_email;
 
 const jwt = require("jsonwebtoken");
-const { formatDate, generateCode } = require("../../../utils/hook");
-const now = new Date(); // Récupérez la date et l'heure actuelle
+const { generateCode, formatDate } = require("../../../utils/hook");
 
 // 1-Inscription de l'admin principal
 module.exports.register_Admin_Principal = async_handler(async (req, res) => {
@@ -164,7 +163,7 @@ module.exports.login_Admin = async_handler(async (req, res) => {
         return res.status(401).json({
           message: `Veuillez changer votre mot de passe pour des raisons de sécurité si vous n'êtes pas l'auteur de la
 
-          procédure de changement du mot de passe du ${dateFormat(
+          procédure de changement du mot de passe du ${formatDate(
             user.reset_password_expires_Admin
           )}`,
         });

@@ -16,7 +16,7 @@ router.post(
   admin_auth_controler.register_Admin_Role
 );
 //Connexion des admins
-router.post("/login_admin_role/:id", admin_auth_controler.login_Admin);
+router.post("/login_admin_role", admin_auth_controler.login_Admin);
 
 //Changement du mot de passe forget
 router.post("/forget_admin", admin_auth_controler.forget_password_admin);
