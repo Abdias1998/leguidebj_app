@@ -12,7 +12,7 @@ const ObjectdId = mongoose.Types.ObjectId;
 const sendEmail = sendEmail_request.send_email;
 
 const jwt = require("jsonwebtoken");
-const { generateCode} = require("../../../utils/hook");
+const { generateCode } = require("../../../utils/hook");
 
 // 1-Inscription de l'admin principal
 module.exports.register_Admin_Principal = async_handler(async (req, res) => {
@@ -57,7 +57,7 @@ module.exports.register_Admin_Principal = async_handler(async (req, res) => {
   // Renvoyer une erreur 403 si l'email ou le tel est trouver
   if (admin)
     return res.status(403).json({
-      message: `Admin exist`, 
+      message: `Admin exist`,
     });
 
   // Crypter le mot de passe
@@ -107,7 +107,6 @@ module.exports.register_Admin_Role = async_handler(async (req, res) => {
     return res.status(400).json({ message: `No authorize ${req.params.id} ` });
   }
   admin = await Admin.findById({ _id: req.params.id });
-
 
   if (!admin || admin.role !== "admin_principal")
     return res.status(400).json({
@@ -168,23 +167,23 @@ module.exports.login_Admin = async_handler(async (req, res) => {
         return res.status(401).json({
           message: `Vous n'avez pas de compte admin avec ces informations d'identification, veuillez vous inscrire en premier.`,
         });
-        // if(user.isAdminPrincipal === true){
-        //   fs.readFile("./html/admin/login_admin_principal.html", "utf-8", (err, data) => {
-        //     if (err) {
-        //       return res.status(401).json({ message: err });
-        //     } else {
-        //       const html = data
-        //         .replace(/{name}/g, user.name)
-      
-        //       sendEmail(
-        //         existingAdmin.email,
-        //         `Connexion au compte admin`,
-        //         html
-        //       );
-        //     }
-        //   });
-        // }
-     
+      // if(user.isAdminPrincipal === true){
+      //   fs.readFile("./html/admin/login_admin_principal.html", "utf-8", (err, data) => {
+      //     if (err) {
+      //       return res.status(401).json({ message: err });
+      //     } else {
+      //       const html = data
+      //         .replace(/{name}/g, user.name)
+
+      //       sendEmail(
+      //         existingAdmin.email,
+      //         `Connexion au compte admin`,
+      //         html
+      //       );
+      //     }
+      //   });
+      // }
+
       /* 3 - Décrypter le mot de passe avant de le vérifiez avec celle de la base de donnée qvec bcrypt*/
       const passwordHashed = bcrypt.compareSync(password, user.password);
       if (!passwordHashed) {
@@ -202,8 +201,8 @@ module.exports.login_Admin = async_handler(async (req, res) => {
         expires: new Date(
           Date.now() + 24 * 60 * 60 * 1000 * 7
         ) /**Durée de vie du cookie qui est de 3 jours */,
-        httpOnly: true, //Only server
-        sameSite: `lax`, //cross site, empêcher les réquêtes d'autres domaines
+        // httpOnly: true, //Only server
+        // sameSite: `lax`, //cross site, empêcher les réquêtes d'autres domaines
         secure: true, // https
       });
 
