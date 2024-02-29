@@ -18,7 +18,7 @@ const backend_url = process.env.backend_url;
 const allowedOrigins = [process.env.client_url, backend_url];
 app.use(cookieParser());
 app.use(helmet());
-app.use(cors({ credentials: true, origin: allowedOrigins }));
+app.use(cors({ credentials: true, origin: backend_url }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "./frontend/build")));
@@ -44,3 +44,32 @@ app.use("/v1/admin", admin_route);
 app.listen(port, () => {
   console.log(`Le serveur est démarrer sur le port ${port}`);
 });
+
+// const express = require("express");
+// const next = require("next");
+
+// const dev = process.env.NODE_ENV !== "production";
+// const appNext = next({ dev });
+// const handle = appNext.getRequestHandler();
+
+// appNext.prepare().then(() => {
+//   const app = express();
+//   const port = process.env.PORT || 3000;
+
+//   // Ajoutez ici vos middlewares et routes Express.js
+
+//   // Exemple de route Express pour servir des fichiers statiques de Next.js
+//   app.get("/_next/*", (req, res) => {
+//     handle(req, res);
+//   });
+
+//   // Exemple de route Express pour gérer toutes les autres requêtes
+//   app.get("*", (req, res) => {
+//     handle(req, res);
+//   });
+
+//   app.listen(port, (err) => {
+//     if (err) throw err;
+//     console.log(`> Ready on http://localhost:${port}`);
+//   });
+// });
