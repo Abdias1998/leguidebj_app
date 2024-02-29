@@ -29,17 +29,18 @@ router.post("/register_admin", admin_auth_controler.register_Admin_Principal); /
 // Inscription des admins par rôle
 router.post(
   "/register_admin_role/:id",
-  admin_middleware.verify_token_admin, 
-  admin_auth_controler.register_Admin_Role 
+  admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
+  admin_auth_controler.register_Admin_Role
 ); ///ok
 //Connexion des admins
 router.post("/login_admin_role", admin_auth_controler.login_Admin); //OK
-
 
 // Déconnexion
 router.post(
   "/logout_admin",
   admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
   admin_auth_controler.logout
 );
 
@@ -47,6 +48,7 @@ router.post(
 router.get(
   "/retrieve_all_admin",
   admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
   admin_retrieve_controler.get_all_admin
 ); //ok
 
@@ -54,13 +56,15 @@ router.get(
 router.delete(
   "/delete_admin/:id",
   admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
   admin_retrieve_controler.delete_profil_admin
 ); //ok
- 
+
 // Récuperer les infos de profil d'un admin
 // router.get(
 //   "/retrieve_admin/:id",
 //   admin_middleware.verify_token_admin,
+//   admin_middleware.get_admin_info,
 //   admin_retrieve_controler.
 // );
 
@@ -68,6 +72,7 @@ router.delete(
 router.get(
   "/admin_verify_token",
   admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
   admin_middleware.get_admin_info
 );
 
@@ -75,6 +80,7 @@ router.get(
 router.get(
   "/admin_total_role",
   admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
   admin_retrieve_controler.getCountByRoles
 ); //ok
 
@@ -82,6 +88,7 @@ router.get(
 router.get(
   "/send_pdf_all_manager",
   admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
   admin_retrieve_controler.sendPdfListeMember
 );
 // Les guides
@@ -90,6 +97,7 @@ router.get(
 router.post(
   "/register_guide",
   admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
   uploads.array("document", 50),
   admin_guide_controler.createGuide
 ); //ok
@@ -98,6 +106,7 @@ router.post(
 router.delete(
   "/delete_guide/:id",
   admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
   admin_guide_controler.deleteGuide
 ); //ok
 
@@ -105,6 +114,7 @@ router.delete(
 router.put(
   "/update_guide/:id",
   admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
   admin_guide_controler.updateGuide
 ); //ok
 
@@ -112,28 +122,30 @@ router.put(
 router.get(
   "/get_all_guides",
   admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
   admin_guide_controler.get_all_guide
 ); //ok
-
 
 // le nombre total de commentaire pour touts les guides
 router.get(
   "/get_all_guides_comments",
   admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
   admin_guide_comments_controler.getTotalCommentsForAllGuide
 );
 // le nombre total de guide active et non active
 router.get(
   "/get_all_guides_active!",
   admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
   admin_guide_controler.get_active_and_diseable
 ); //ok
-
 
 // Envoyer la liste des guides
 router.get(
   "/send_pdf_all_guide",
   admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
   admin_guide_controler.sendPdfListe
 );
 // Les utilisateurs
@@ -141,12 +153,14 @@ router.get(
 router.get(
   "/get_all_users",
   admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
   admin_users_controler.get_all_users
 );
 // Recuperer les utilisateurs bannie et signaler
 router.get(
   "/users_total_order",
   admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
   admin_users_controler.getUserStats
 );
 
@@ -154,6 +168,7 @@ router.get(
 router.get(
   "/send_pdf_all_users",
   admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info,
   admin_users_controler.sendPdfListe
 );
 module.exports = router;
