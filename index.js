@@ -15,7 +15,7 @@ const app = express();
 const port = process.env.port;
 const backend_url = process.env.backend_url;
 // Définition des origines autorisées
-const allowedOrigins = [process.env.client_url, backend_url];
+// const allowedOrigins = [process.env.client_url, backend_url];
 app.use(cookieParser());
 app.use(helmet());
 app.use(cors({ credentials: true, origin: backend_url }));

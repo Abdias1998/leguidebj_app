@@ -12,7 +12,7 @@ const ObjectdId = mongoose.Types.ObjectId;
 const sendEmail = sendEmail_request.send_email;
 
 const jwt = require("jsonwebtoken");
-const { generateCode, formatDate } = require("../../../utils/hook");
+const { generateCode} = require("../../../utils/hook");
 
 // 1-Inscription de l'admin principal
 module.exports.register_Admin_Principal = async_handler(async (req, res) => {
@@ -168,22 +168,22 @@ module.exports.login_Admin = async_handler(async (req, res) => {
         return res.status(401).json({
           message: `Vous n'avez pas de compte admin avec ces informations d'identification, veuillez vous inscrire en premier.`,
         });
-        if(user.isAdminPrincipal === true){
-          fs.readFile("./html/admin/login_admin_principal.html", "utf-8", (err, data) => {
-            if (err) {
-              return res.status(401).json({ message: err });
-            } else {
-              const html = data
-                .replace(/{name}/g, existingAdmin.name)
+        // if(user.isAdminPrincipal === true){
+        //   fs.readFile("./html/admin/login_admin_principal.html", "utf-8", (err, data) => {
+        //     if (err) {
+        //       return res.status(401).json({ message: err });
+        //     } else {
+        //       const html = data
+        //         .replace(/{name}/g, user.name)
       
-              sendEmail(
-                existingAdmin.email,
-                `Connexion au compte admin`,
-                html
-              );
-            }
-          });
-        }
+        //       sendEmail(
+        //         existingAdmin.email,
+        //         `Connexion au compte admin`,
+        //         html
+        //       );
+        //     }
+        //   });
+        // }
      
       /* 3 - Décrypter le mot de passe avant de le vérifiez avec celle de la base de donnée qvec bcrypt*/
       const passwordHashed = bcrypt.compareSync(password, user.password);
@@ -192,15 +192,15 @@ module.exports.login_Admin = async_handler(async (req, res) => {
       }
       /**Authentifer l'user dans le cookie avec son id personnel */
       const token = jwt.sign({ id: user._id }, process.env.token_auth_admin, {
-        expiresIn: `3d` /**Duréé maximum de vie du token */,
+        expiresIn: `7d` /**Duréé maximum de vie du token */,
       });
 
       /* 5 - Envoyer la réponse dans le cookie */
 
-      res.cookie(String("leguidebj_admin"), token, {
+      res.cookie(String("leguidebj"), token, {
         path: `/`, // Path cookie
         expires: new Date(
-          Date.now() + 24 * 60 * 60 * 1000 * 3
+          Date.now() + 24 * 60 * 60 * 1000 * 7
         ) /**Durée de vie du cookie qui est de 3 jours */,
         httpOnly: true, //Only server
         sameSite: `lax`, //cross site, empêcher les réquêtes d'autres domaines
