@@ -28,8 +28,13 @@ module.exports.setAllMajWords = (toFirstWord, texte) => {
 
 module.exports.generateCode = () => {
   let code = "";
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 7 ; i++) {
     code += Math.floor(Math.random() * 10);
   }
   return code;
+};
+module.exports.codeByCountry = (country) => {
+  if (country === "Benin") return "+229";
+  if (country === "Togo") return "+228";
+  if (country === "Ghana") return "+230";
 };

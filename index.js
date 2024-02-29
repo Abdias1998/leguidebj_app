@@ -25,7 +25,21 @@ app.use(express.static(path.join(__dirname, "./frontend/build")));
 app.get(["/"], function (req, res) {
   res.sendFile(path.join(__dirname, "./frontend/build", "index.html"));
 });
+app.use(
+  express.static(path.join(__dirname, "./frontend/build/assets/guide/document"))
+);
 
+app.get("/frontend/build/assets/guide/document/:filename", (req, res) => {
+  const filename = req.params.filename;
+  // Récupérer le chemin complet de l'image
+  const imagePath = path.join(
+    __dirname,
+    "./frontend/build/assets/guide/document",
+    filename
+  );
+  // Renvoyer l'image au client
+  res.sendFile(imagePath);
+});
 app.use("/v1/admin", admin_route);
 app.listen(port, () => {
   console.log(`Le serveur est démarrer sur le port ${port}`);

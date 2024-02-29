@@ -84,9 +84,13 @@ const guide_schema = mongoose.Schema(
       type: String,
       required: true,
     },
+    badge_url: {
+      type: String,
+      required: true,
+    },
     is_active: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     is_desactive: {
       type: Boolean,

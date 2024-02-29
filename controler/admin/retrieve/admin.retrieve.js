@@ -1,4 +1,4 @@
-// /* global process */
+/* global process */
 // /* global __dirname */
 const Admin = require("../../../model/admin/admin.model");
 const validator = require("validator");
@@ -9,6 +9,7 @@ const async_handler = require("express-async-handler");
 // const { send_email } = require("../../../utils/send.email");
 // const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
+const { send_email } = require("../../../utils/send.email");
 const ObjectdId = mongoose.Types.ObjectId;
 //1- Récuperer touts les admins
 module.exports.get_all_admin = async_handler(async (req, res) => {
@@ -22,81 +23,6 @@ module.exports.get_all_admin = async_handler(async (req, res) => {
   }).select(`-password`);
 });
 
-//2- Mettre a jour le profil d'un admin
-module.exports.update_profil_admin = async_handler(async (req, res) => {
-  const { email, tel, role } = req.body;
-  /**La méthode ObjectId de mongoose pour vérifer si le nombre de caractère est exacte à celle de mongoose */
-  if (!ObjectdId.isValid(req.params.id))
-    return res.status(404).send({ messsage: `Utulisateur inconnu` });
-  /*2 - Vérifiez maintenant si les données saisir respecte notre schéma de validation */
-  /**Mettre à jour 4 champs(nom,prénom,tel et email) */
-  if (
-    validator.isEmpty(email) ||
-    validator.isEmpty(tel) ||
-    validator.isEmpty(role)
-  )
-    return res.status(401).json({
-      message: `Veuillez remplir touts les champs`,
-    });
-  if (!validator.isEmail(email))
-    return res
-      .status(401)
-      .json({ message: `Votre nouvelle adress email est invalid` });
-  if (!validator.isLength(tel, { min: 8, max: 8 }))
-    return res.status(401).json({
-      message: `Saisissez un nouveau numéro de téléphone du Bénin valide sans espace. Ex: 53000000`,
-    });
-  let admin;
-  admin = await Admin.findById({ _id: req.params.id });
-  if (admin.role !== "admin_principal")
-    return res.status(403).json({
-      messsage: `Vous n'ètes pas autorisé en tant que administrateur`,
-    });
-
-  /**Metrre à jour les informatio dans la base de donnéé */
-
-  /**Si l'email est trouver, lui renvoyé une réponse 403 qu'il est déja pris */
-
-  let existingUser;
-  existingUser = await Admin.findOne({ email: email });
-  if (existingUser && existingUser._id.toString() !== req.params.id)
-    return res
-      .status(401)
-      .json({ message: `Cet émail est déjà utilisé par un utilisateur` });
-  else
-    try {
-      Admin.findByIdAndUpdate(
-        req.params.id,
-        {
-          $set: {
-            tel: tel,
-            email: email,
-            role: role,
-          },
-        },
-        {
-          new: true,
-        },
-        (err, docs) => {
-          /**Réponse finale */
-          if (!err)
-            return res.status(200).json({
-              message: "Vos informations sont mises à jours",
-              docs /**Renvoyer l'user sans son mot de passe */,
-            });
-          else
-            return res.status(401).json({
-              message: `L'administrateur avec cet email existe déja, veuillez choisir un autre`,
-            });
-        }
-      ).select(`-password`);
-    } catch (error) {
-      return res.status(500).json({
-        message: `Erreur interne du serveur, veuillez réessayer plus tard !' ${error}`,
-      });
-    }
-});
-
 // 3-Supprimer un admin
 module.exports.delete_profil_admin = async_handler(async (req, res) => {
   /**Vérifez si l'id est conforme à cele de_id mongoose */
@@ -106,12 +32,7 @@ module.exports.delete_profil_admin = async_handler(async (req, res) => {
       .json({ message: `Utulisateur inconnu ${req.params.id}` });
   }
 
-  /**Rechercher l'identifiant avec l'id passer en params */
-  let admin;
-  admin = await Admin.findById({ _id: req.params.id });
-  if (!admin || admin.role !== "admin_principal")
-    return res.status(403).json({ messsage: `Vous n'ètes pas autorisé` });
-  /**Si l'identifiant existe, le supprimer de la bse de donnée */
+ 
   await Admin.findByIdAndRemove(req.params.id, (error) => {
     if (!error)
       /**Réponse finale */
@@ -138,4 +59,89 @@ module.exports.info_admin = async_handler(async (req, res) => {
         message: "Id de l'utilisateur est inconnu",
       });
   }).select("-password");
+});
+
+// Contrôleur pour obtenir le nombre d'admins avec isManager et isAdminPrincipal
+module.exports.getCountByRoles = async_handler(async (req, res) => {
+  try {
+    const countIsManager = await Admin.countDocuments({ isManager: true });
+    const countIsAdminPrincipal = await Admin.countDocuments({
+      isAdminPrincipal: true,
+    });
+
+    res.json({ countIsManager, countIsAdminPrincipal });
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération du nombre d'admins par rôle :",
+      error
+    );
+    res.status(500).json({
+      error:
+        "Erreur serveur lors de la récupération du nombre d'admins par rôle.",
+    });
+  }
+});
+
+module.exports.sendPdfListeMember = async_handler(async (req, res) => {
+  try {
+    const users = await Admin.find(
+      {},
+      "name email tel role isAdminPrincipal isManager"
+    );
+
+    // Filtrer les utilisateurs par propriété isSuperAdmin et isMember
+    const filteredUsers = users.filter(
+      (membre) => membre.isAdminPrincipal === false
+    );
+
+    // Trier les utilisateurs par ordre alphabétique des noms (proprieté 'names')
+    const sortedUsers = filteredUsers.sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
+
+    // Créer un tableau HTML pour afficher tous les utilisateurs triés par ordre alphabétique des noms
+    let tableHTML = `
+      <table style=" font-family: Arial, sans-serif; width: 210mm; border-collapse: collapse;">
+        <thead>
+          <tr style="background-color: #ECECEC; border-bottom: 1px solid #CCCCCC; text-align: center;">
+            <th style="padding: 2px; border: 1px solid #CCCCCC;">Compte</th>
+            <th style="padding: 2px; border: 1px solid #CCCCCC;">Email</th>
+            <th style="padding: 2px; border: 1px solid #CCCCCC;">Tél</th>
+            <th style="padding: 2px; border: 1px solid #CCCCCC;">Rôle</th>
+      
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    sortedUsers.forEach((user) => {
+      tableHTML += `
+        <tbody>
+          <tr style="border-bottom: 1px solid #CCCCCC;">
+            <td style="padding: 2px; border: 1px solid #CCCCCC;">${user.name}</td>
+            <td style="color:green;padding: 2px; border: 1px solid #CCCCCC;">${user?.email}</td>
+            <td  style="color:blue;padding: 2px; border: 1px solid #CCCCCC;">${user?.tel}</td>
+            <td style="color:orange;padding: 2px; border: 1px solid #CCCCCC;">${user?.role}</td>
+          
+          </tr>
+        </tbody>
+      `;
+    });
+
+    tableHTML += `
+      </tbody>
+    </table>
+  `;
+
+    send_email(
+      process.env.userAdmin,
+      `Liste des Admins de la plateforme : LE GUIDE BJ`,
+      tableHTML
+    );
+    return res.status(201).json({
+      message: `Liste des administrateurs de la plateforme envoyé`,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error });
+  }
 });

@@ -19,15 +19,11 @@ const admin_schema = mongoose.Schema(
       type: String,
       required: true,
     },
-    reset_password_token_Admin: {
-      type: String,
-      default: "",
+    isManager: {
+      type: Boolean,
+      default: false,
     },
-    reset_password_expires_Admin: {
-      type: Date,
-      default: "",
-    },
-    isAdmin: {
+    isAdminPrincipal: {
       type: Boolean,
       default: false,
     },
