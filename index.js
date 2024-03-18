@@ -17,11 +17,6 @@ const client_url = process.env.client_url;
 
 // Définition des origines autorisées
 // const allowedOrigins = [process.env.client_url, backend_url];
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  next();
-});
-
 app.use(cookieParser());
 app.use(helmet());
 app.use(cors({ credentials: true, origin: client_url}));
