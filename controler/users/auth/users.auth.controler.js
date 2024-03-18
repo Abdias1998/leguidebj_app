@@ -55,7 +55,7 @@ module.exports.login_Admin = async_handler(async (req, res) => {
             Date.now() + 24 * 60 * 60 * 1000 * 7
           ) /**Durée de vie du cookie qui est de 7 jours */,
           httpOnly: true, //Only server
-          sameSite: `lax`, //cross site, empêcher les réquêtes d'autres domaines
+          // sameSite: `lax`, //cross site, empêcher les réquêtes d'autres domaines
           secure: true, // https
         });
   
