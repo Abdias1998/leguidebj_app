@@ -4,14 +4,15 @@ const mongoose = require("mongoose");
 const { send_email } = require("../../../utils/send.email");
 const ObjectdId = mongoose.Types.ObjectId;
 module.exports.get_all_users = async_handler(async (req, res) => {
-  /**Recuperer avec la méthode find de mongoose sans les mots de passe */
-  Users.find((error, docs) => {
-    if (!error) res.send(docs);
-    else
-      return res.status(500).json({
-        message: `Vous pouvez pas récuperer les données des administrateurs`,
-      });
-  }).select(`-password`);
+  try {
+    const users = await Users.find().select('-password');
+    res.send(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    return res.status(500).json({
+      message: `Vous ne pouvez pas récupérer les données des utilisateurs`,
+    });
+  }
 });
 
 // Users bannie

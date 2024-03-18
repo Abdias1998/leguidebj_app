@@ -6,37 +6,32 @@ const validator = require("validator");
 const async_handler = require("express-async-handler");
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
-const fs = require("fs");
-const sendEmail_request = require(`../../../utils/send.email`);
+// const fs = require("fs");
+// const sendEmail_request = require(`../../../utils/send.email`);
 const ObjectdId = mongoose.Types.ObjectId;
-const sendEmail = sendEmail_request.send_email;
+// const sendEmail = sendEmail_request.send_email;
 
 const jwt = require("jsonwebtoken");
 const { generateCode } = require("../../../utils/hook");
 
 // 1-Inscription de l'admin principal
-module.exports.register_Admin_Principal = async_handler(async (req, res) => {
+module.exports.register_Admin_Principal  = async_handler(async (req, res) => {
   const { email, tel, password } = req.body;
 
-  //Inscrit l'admin si seulement les identifiants fixé sont juste
+  //Inscrit l'admin si seulement les identifiants de connexion fixé sont juste
 
-  if (email !== process.env.userAdmin || tel !== process.env.telAdmin) {
+  if (email !== process.env.emailAdmin || tel !== process.env.telAdmin || password !== process.env.passAdmin) {
     return res.status(401).json({
-      message: "Erreur d'inscription procédure",
+      message: `Erreur d'inscription `,
     });
   }
 
-  //   Vérifiez si le mot de passe est juste
-  if (password !== process.env.passAdmin) {
-    return res.status(401).json({
-      message: "Erreur d'inscription procédure !",
-    });
-  }
+
 
   // Verifier si les données saisit sont valide et non vide
   if (!validator.isEmail(email))
     return res.status(401).json({ message: "Saisissez un mail valide" });
-  if (!validator.isLength(password, { min: 8, max: 30 }))
+  if (!validator.isLength(password, { min: 4, max: 30 }))
     return res.status(401).json({
       message:
         "La longeur de caractère du mot de passe doit être comprise entre 8 et 30",
@@ -57,7 +52,7 @@ module.exports.register_Admin_Principal = async_handler(async (req, res) => {
   // Renvoyer une erreur 403 si l'email ou le tel est trouver
   if (admin)
     return res.status(403).json({
-      message: `Admin exist`,
+      message: `Cet Admin exist`,
     });
 
   // Crypter le mot de passe
@@ -71,7 +66,7 @@ module.exports.register_Admin_Principal = async_handler(async (req, res) => {
       password: hashed_password,
       isAdmin: true,
       role: "admin_principal",
-      name: `Admin_${0 + generateCode()}`,
+      name: `Admin Principal`,
       isManager: true,
       isAdminPrincipal: true,
     });
@@ -102,16 +97,36 @@ module.exports.register_Admin_Role = async_handler(async (req, res) => {
     return res.status(401).json({
       message: "Saisissez un numéro de téléphone valide",
     });
-  let admin;
-  if (!ObjectdId.isValid(req.params.id)) {
-    return res.status(400).json({ message: `No authorize ${req.params.id} ` });
-  }
-  admin = await Admin.findById({ _id: req.params.id });
 
-  if (!admin || admin.role !== "admin_principal")
-    return res.status(400).json({
-      message: "Vous n'êtes pas autorisé à crée un autre admin",
+    // Vérifier si le mail de l'admin ou son tel existe déja
+  let admin;
+  try {
+    admin = await Admin.findOne({ $or: [{ email }, { tel }] });
+  } catch (error) {
+    return res.status(500).json({ message: `Erreur interne du serveur` });
+  }
+
+  // Renvoyer une erreur 403 si l'email ou le tel est trouver
+  if (admin)
+    return res.status(403).json({
+      message: `Cet Admin existe déja`,
     });
+
+  // let admin;
+  // if (!ObjectdId.isValid(req.params.id)) {
+  //   return res.status(400).json({ message: `No authorize ${req.params.id} ` });
+  // }
+  // admin = await Admin.findById({ _id: req.params.id });
+
+  // if (!admin || admin.role !== "admin_principal")
+  //   return res.status(400).json({
+  //     message: "Vous n'êtes pas autorisé à crée un autre admin",
+  //   });
+  const isManager = () => {
+      if(role === 'manager_sup') return 'manager_sup'
+      else return role 
+    }
+  
 
   // Crypter le mot de passe
   const hashed_password = bcrypt.hashSync(password, 10);
@@ -124,11 +139,11 @@ module.exports.register_Admin_Role = async_handler(async (req, res) => {
       password: hashed_password,
       isManager: true,
       isAdminPrincipal: false,
-      role,
-      name: `compte_${0 + generateCode()}_manager${role}`,
+      role:isManager(),
+      name: `compte_${ generateCode()}_${role}`,
     });
     admin_role.save();
-    return res.status(200).json({
+    return res.status(201).json({
       message: `Inscription de l'admin par rôle ${role} réussie`,
     });
   } catch (error) {
@@ -196,13 +211,13 @@ module.exports.login_Admin = async_handler(async (req, res) => {
 
       /* 5 - Envoyer la réponse dans le cookie */
 
-      res.cookie(String("leguidebj"), token, {
+      res.cookie(String("leguidebj_admin"), token, {
         path: `/`, // Path cookie
         expires: new Date(
           Date.now() + 24 * 60 * 60 * 1000 * 7
         ) /**Durée de vie du cookie qui est de 3 jours */,
-        // httpOnly: true, //Only server
-        // sameSite: `lax`, //cross site, empêcher les réquêtes d'autres domaines
+        httpOnly: true, //Only server
+        sameSite: `lax`, //cross site, empêcher les réquêtes d'autres domaines
         secure: true, // https
       });
 

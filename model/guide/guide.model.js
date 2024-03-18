@@ -55,6 +55,10 @@ const guide_schema = mongoose.Schema(
     profil: {
       type: String,
     },
+    experience: {
+      type: String,
+      required: true,
+    },
     comments: [
       {
         userId: {

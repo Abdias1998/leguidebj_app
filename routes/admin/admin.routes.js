@@ -16,7 +16,7 @@ const storages = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     cb(null, `${file.originalname}`);
-  },
+  }, 
 });
 // const uploads = multer({ storage: storages });
 const uploads = multer({
@@ -26,14 +26,15 @@ const uploads = multer({
 //Inscription de l'admin principal
 router.post("/register_admin", admin_auth_controler.register_Admin_Principal); //ok
 
-// Inscription des admins par rôle
-router.post(
-  "/register_admin_role/:id",
-  admin_middleware.verify_token_admin,
-  admin_auth_controler.register_Admin_Role
-); ///ok
-//Connexion des admins
+
+//Connexion des admins  
 router.post("/login_admin_role", admin_auth_controler.login_Admin); //OK
+/**Vérifiez si son token est valide en renvoyant ses informations sans son mot de passse*/
+router.get(
+  "/admin_verify_token",
+  admin_middleware.verify_token_admin,
+  admin_middleware.get_admin_info
+);
 
 // Déconnexion
 router.post(
@@ -41,7 +42,12 @@ router.post(
   admin_middleware.verify_token_admin,
   admin_auth_controler.logout
 );
-
+// Inscription des admins par rôle
+router.post(
+  "/register_admin_role",
+  admin_middleware.verify_token_admin,
+  admin_auth_controler.register_Admin_Role
+); ///ok
 //Liste de touts les administrateurs
 router.get(
   "/retrieve_all_admin",
@@ -62,13 +68,6 @@ router.delete(
 //   admin_middleware.verify_token_admin,
 //   admin_retrieve_controler.
 // );
-
-/**Vérifiez si son token est valide en renvoyant ses informations sans son mot de passse*/
-router.get(
-  "/admin_verify_token",
-  admin_middleware.verify_token_admin,
-  admin_middleware.get_admin_info
-);
 
 /**Recuperer le nombre total d'admin , de manager*/
 router.get(
@@ -99,7 +98,16 @@ router.delete(
   admin_middleware.verify_token_admin,
   admin_guide_controler.deleteGuide
 ); //ok
-
+router.get(
+  "/get-guides-by-year",
+  // admin_middleware.verify_token_admin,
+  admin_guide_controler.get_guides_by_year
+); //ok
+router.get(
+  "/get-users-by-year",
+  // admin_middleware.verify_token_admin,
+  admin_guide_controler.get_users_by_year
+); //ok
 // Mettre à jour un guide
 router.put(
   "/update_guide/:id",
@@ -113,6 +121,7 @@ router.get(
   admin_middleware.verify_token_admin,
   admin_guide_controler.get_all_guide
 ); //ok
+
 
 // le nombre total de commentaire pour touts les guides
 router.get(

@@ -6,8 +6,8 @@ mongoose.set("strictQuery");
 mongoose
   .connect(`${process.env.mongoDbUrl}`)
   .then(() => {
-    console.log(`Connected to dataBase`);
+    console.log(`Connected to dataBase`); 
   })
   .catch((error) => {
-    console.log(`Error to Connected to dataBase ${error}`);
+    console.log(`Error to Connected to dataBase ${error}`); 
   });

@@ -1,7 +1,8 @@
 const Guide = require("../../../model/guide/guide.model");
+const User= require("../../../model/users/user.model");
 
 const Admin = require("../../../model/admin/admin.model");
-
+const fs =require('fs')
 const async_handler = require(`express-async-handler`);
 /* global process */
 
@@ -15,20 +16,18 @@ const qrCode = require("qrcode");
 module.exports.createGuide = async_handler(async (req, res) => {
   const {
     firstName,
+    experience,
     lastName,
     email,
     tel,
     country,
     zone,
     language,
-    description,
+    description,available 
   } = req.body;
 
-  /*Vérifiez si c'est l'admin qui crée l'utilisateur*/
-  let admin;
-  if (!ObjectdId.isValid(req.params.id)) {
-    return res.status(400).json({ message: `No authorize ${req.params.id} ` });
-  }
+  
+
 
   /**Envoyer les données dans notre base de donnée */
   const document = req.files?.map(
@@ -42,6 +41,8 @@ module.exports.createGuide = async_handler(async (req, res) => {
     validator.isEmpty(zone) ||
     validator.isEmpty(description) ||
     validator.isEmpty(language) ||
+    validator.isEmpty(experience) ||
+    validator.isEmpty(available ) ||
     validator.isEmpty(tel)
   )
     return res.status(401).json({
@@ -72,7 +73,18 @@ module.exports.createGuide = async_handler(async (req, res) => {
     process.env.telAdmin
   }
    `;
-
+   // Vérifier si le mail du guide ou son tel existe déja
+   let guide;
+   try {
+    guide = await Guide.findOne({ $or: [{ email }, { tel }] });
+   } catch (error) {
+     return res.status(500).json({ message: `Erreur interne du serveur` });
+   }
+  // Renvoyer une erreur 403 si l'email ou le tel est trouver
+  if (guide)
+    return res.status(403).json({
+      message: `Cet Guide existe déja`,
+    });
   try {
     qrCode.toDataURL(data, async (err, url) => {
       if (err)
@@ -87,8 +99,10 @@ module.exports.createGuide = async_handler(async (req, res) => {
         email,
         tel,
         country,
+        experience,
         zone,
         description,
+        available ,
         language,
         document,
         is_active: true,
@@ -103,15 +117,17 @@ module.exports.createGuide = async_handler(async (req, res) => {
           return res.status(401).json({ message: err });
         } else {
           const html = data
-            .replace(/{names}/g, existingAdmin.names)
-            .replace(/{zone}/g, existingAdmin.zone)
-            .replace(/{language}/g, existingAdmin.language)
-            .replace(/{country}/g, existingAdmin.country)
-            .replace(/{email}/g, existingAdmin.email)
-            .replace(/{tel}/g, existingAdmin.tel)
-            .replace(/{description}/g, existingAdmin.description);
+            .replace(/{names}/g, `${firstName-lastName}`)
+            .replace(/{zone}/g, zone)
+            .replace(/{language}/g, language)
+            .replace(/{country}/g, country)
+            .replace(/{email}/g, email)
+            .replace(/{tel}/g, tel) 
+            .replace(/{experience}/g, experience)
+            .replace(/{available }/g, available )
+            .replace(/{description}/g, description);
 
-          send_email(existingAdmin.email, `Connexion au compte admin`, html);
+          send_email(email, `Connexion au compte admin`, html);
         }
       });
       return res.status(201).json({
@@ -121,35 +137,24 @@ module.exports.createGuide = async_handler(async (req, res) => {
   } catch (error) {
     res.status(403).json({
       message: `Erreur interne du serveur, veuillez réessayer plus tard`,
-    });
+    }); 
   }
 });
 
 // 2-Suppression du profil des guides
 module.exports.deleteGuide = async_handler(async (req, res) => {
-  /*Vérifiez si c'est l'admin qui crée l'utilisateur*/
-  let admin;
-  if (!ObjectdId.isValid(req.params.id)) {
-    return res.status(400).json({ message: `No authorize ${req.params.id} ` });
-  }
-  admin = await Admin.findById({ _id: req.params.id });
-  if (!admin)
-    return res.status(400).json({
-      message: "No authorize ",
-    });
+  const { id } = req.params;
 
-  //Si le guide existe, le supprimer de la bse de donnée
-  await Guide.findByIdAndRemove(req.params.id, (error) => {
-    if (!error)
-      /**Réponse finale */
-      return res
-        .status(200)
-        .json({ message: `Le guide supprimez avec succèes` });
-    else
-      return res.status(500).json({
-        message: `Erreur interne du serveur, veuillez réessayez plus tard la suppression de l'utilisateur ${req.params.id}`,
-      });
-  }).clone();
+  try {
+    const guide = await Guide.findByIdAndDelete(id);
+    if (!guide) {
+      return res.status(404).json({ message: 'Guide non trouvé' });
+    }
+    res.json({ message: 'Guide supprimé avec succès' });
+  } catch (error) {
+    console.error('Erreur lors de la suppression du Guide :', error);
+    res.status(500).json({ message: 'Erreur lors de la suppression du Guide' });
+  }
 });
 
 // 4-Modification du profil des guides
@@ -161,6 +166,7 @@ module.exports.updateGuide = async_handler(async (req, res) => {
     tel,
     country,
     zone,
+    available,experience,
     description,
     language,
   } = req.body;
@@ -177,6 +183,8 @@ module.exports.updateGuide = async_handler(async (req, res) => {
     validator.isEmpty(zone) ||
     validator.isEmpty(description) ||
     validator.isEmpty(language) ||
+    validator.isEmpty(available) ||
+    validator.isEmpty(experience) ||
     validator.isEmpty(tel)
   )
     return res.status(401).json({
@@ -220,6 +228,8 @@ module.exports.updateGuide = async_handler(async (req, res) => {
             tel: tel,
             email: email,
             country: country,
+            available:available,
+            experience:experience,
             zone: zone,
             description: description,
             language: language,
@@ -260,16 +270,16 @@ module.exports.activateGuide = async_handler(async (req, res) => {
 });
 // 7-La liste des guides
 module.exports.get_all_guide = async_handler(async (req, res) => {
-  /**Recuperer avec la méthode find de mongoose sans les mots de passe */
-  Guide.find((error, docs) => {
-    if (!error) res.send(docs);
-    else
-      return res.status(500).json({
-        message: `Vous pouvez pas récuperer les données des administrateurs`,
-      });
-  }).select(`-password`);
+  try {
+    const users = await Guide.find().select('-password');
+    res.send(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    return res.status(500).json({
+      message: `Vous ne pouvez pas récupérer les données des administrateurs`,
+    });
+  }
 });
-
 //8- Contrôleur pour obtenir le nombre de guide avec is_active
 module.exports.get_active_and_diseable = async_handler(async (req, res) => {
   try {
@@ -369,6 +379,67 @@ module.exports.sendPdfListe = async_handler(async (req, res) => {
     return res.status(500).json({ message: error });
   }
 });
+
+module.exports.get_guides_by_year = async_handler(async(req,res)=>{
+  try {
+    // Récupération des données des guides enregistrés par année
+    const stats = await Guide.aggregate([
+      {
+        $group: {
+          _id: { $year: '$createdAt' },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          year: '$_id',
+          count: 1
+        }
+      },
+      {
+        $sort: { year: 1 }
+      }
+    ]);
+
+    // Envoi des statistiques en tant que réponse
+    res.json(stats);
+  } catch (error) {
+    // En cas d'erreur, envoyer un code d'erreur et un message d'erreur
+    console.error('Error fetching guide statistics:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+})
+module.exports.get_users_by_year = async_handler(async(req,res)=>{
+  try {
+    // Récupération des données des guides enregistrés par année
+    const stats = await User.aggregate([
+      {
+        $group: {
+          _id: { $year: '$createdAt' },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          year: '$_id',
+          count: 1
+        }
+      },
+      {
+        $sort: { year: 1 }
+      }
+    ]);
+
+    // Envoi des statistiques en tant que réponse
+    res.json(stats);
+  } catch (error) {
+    // En cas d'erreur, envoyer un code d'erreur et un message d'erreur
+    console.error('Error fetching user statistics:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+})
 // 8-Afficher les commentaires des users sur les guides
 
 // 9-Supprimer les commentaires des users sur les guides

@@ -1,0 +1,14 @@
+Les administrateurs 
+*ADMIN PRINCIPAL
+- Le name de l'admin principal est : Admin Principal, son rôle est : admin_principal.Touts ses objets de rôle est true
+-Le mail doit être valide qu format @gmail.com ou @yahoo.format
+-Le téléphone doit être absolument un numéero béninois sans indicatif
+
+
+*ADMIN PAR ROLE
+-Seuls l'admin principal est capable de créer un autre admin en lui donnant un rôle. Dans le frontend il y aura une vérification pour voir le type de rôle de l'admin pour pourvoir restreint l'acces des liens du dashboard. 
+-Les administrateurs par rôle auront acces a deux liens seuls le manager des admins qui est le manager_sup pourrait avoir acces a touts les liens sauf le liens : Compte,Administrateurs,Paramètres
+-Nous avons 5 types de rôles : guide_manager,users_manager,destination_manager,circuit_manager,blog_manager
+-Le name sera au format  : compte_0000000_guide_manager
+
+*CONNEXION DES ADMINS 

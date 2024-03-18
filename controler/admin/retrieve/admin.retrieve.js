@@ -13,37 +13,33 @@ const { send_email } = require("../../../utils/send.email");
 const ObjectdId = mongoose.Types.ObjectId;
 //1- Récuperer touts les admins
 module.exports.get_all_admin = async_handler(async (req, res) => {
-  /**Recuperer avec la méthode find de mongoose sans les mots de passe */
-  Admin.find((error, docs) => {
-    if (!error) res.send(docs);
-    else
-      return res.status(500).json({
-        message: `Vous pouvez pas récuperer les données des administrateurs`,
-      });
-  }).select(`-password`);
+  try {
+    const users = await Admin.find().select('-password');
+    res.send(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    return res.status(500).json({
+      message: `Vous ne pouvez pas récupérer les données des administrateurs`,
+    });
+  }
 });
 
 // 3-Supprimer un admin
 module.exports.delete_profil_admin = async_handler(async (req, res) => {
-  /**Vérifez si l'id est conforme à cele de_id mongoose */
-  if (!ObjectdId.isValid(req.params.id)) {
-    return res
-      .status(400)
-      .json({ message: `Utulisateur inconnu ${req.params.id}` });
-  }
-
  
-  await Admin.findByIdAndRemove(req.params.id, (error) => {
-    if (!error)
-      /**Réponse finale */
-      return res
-        .status(200)
-        .json({ message: `L'utulisateur supprimez avec succèes` });
-    else
-      return res.status(500).json({
-        message: `Erreur interne du serveur, veuillez réessayez plus tard la suppression de l'utilisateur ${req.params.id}`,
-      });
-  }).clone();
+ 
+  const { id } = req.params;
+
+  try {
+    const admin = await Admin.findByIdAndDelete(id);
+    if (!admin) {
+      return res.status(404).json({ message: 'Administrateur non trouvé' });
+    }
+    res.json({ message: 'Administrateur supprimé avec succès' });
+  } catch (error) {
+    console.error('Erreur lors de la suppression de l\'administrateur :', error);
+    res.status(500).json({ message: 'Erreur lors de la suppression de l\'administrateur' });
+  }
 });
 
 // 4-Récuperer les infos d'un admin

@@ -5,7 +5,7 @@ const admin_schema = mongoose.Schema(
   {
     email: {
       type: String,
-      unique: true,
+      unique: true, 
       trim: true,
       lowercase: true,
       required: () => !this.tel,
@@ -29,7 +29,7 @@ const admin_schema = mongoose.Schema(
     },
     role: {
       type: String,
-      default: "",
+      required: true,
     },
     name: {
       type: String,
