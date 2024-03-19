@@ -212,8 +212,7 @@ module.exports.register_Admin_Role = async_handler(async (req, res) => {
 //       });
 //     });
 // });
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+
 
 module.exports.login_Admin = async_handler(async (req, res) => {
   const { identifier, password } = req.body;
