@@ -212,15 +212,13 @@ module.exports.login_Admin = async_handler(async (req, res) => {
       /* 5 - Envoyer la réponse dans le cookie */
 
       res.cookie(String("leguidebj_admin"), token, {
-        path: `/`, // Path cookie
-        expires: new Date(
-          Date.now() + 24 * 60 * 60 * 1000 * 7
-        ) /**Durée de vie du cookie qui est de 3 jours */,
-        httpOnly: true, //Only server
-        sameSite: `lax`, //cross site, empêcher les réquêtes d'autres domaines
-        secure: true, // https
-      });
-
+        path: `/`, // Chemin du cookie
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1000 * 7), // Durée de vie du cookie (une semaine)
+        httpOnly: true, // Accessible uniquement par le serveur HTTP
+        sameSite: `lax`, // Cross-site
+        secure: true, // Cookie valable uniquement sur HTTPS
+    });
+    
       /**Réponse finale quand il est authentifié */
       return res.status(200).json({ message: `Connection réussie` });
     })
