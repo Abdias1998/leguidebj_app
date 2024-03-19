@@ -154,16 +154,75 @@ module.exports.register_Admin_Role = async_handler(async (req, res) => {
 });
 
 //3-Connexion de l'administrateur
+// module.exports.login_Admin = async_handler(async (req, res) => {
+//   const { identifier, password } = req.body;
+
+//   /*1 - Vérifiez maintenant si les données saisir respecte nos schémas de validation */
+//   if (!identifier || !password)
+//     return res
+//       .status(401)
+//       .json({ message: `Veuillez remplir toutes les cases.` });
+
+//   /*2- Récuperer l'email ou le numéro de phone pour se connecter */
+//   let existingAdmin;
+
+//   if (validator.isEmail(identifier)) {
+//     existingAdmin = { email: identifier }; /**Accepte si c'est un email */
+//   } else if (validator.isMobilePhone(identifier, `any`)) {
+//     /**Acccepte si c'est un numéro de n'importe quel pays c'est pourquoi on à 'any' comme seconde valeur */
+//     existingAdmin = { tel: identifier };
+//   } else
+//     return res.status(400).json({
+//       message: `Veuillez saisir un émail ou un numéro de téléphone  valide.`,
+//     });
+//   /**Recuperer la valeur qui passe et le rechercher */
+//   Admin.findOne(existingAdmin)
+//     .then((user) => {
+//       if (!user)
+//         return res.status(401).json({
+//           message: `Vous n'avez pas de compte admin avec ces informations d'identification, veuillez vous inscrire en premier.`,
+//         });
+     
+//       /* 3 - Décrypter le mot de passe avant de le vérifiez avec celle de la base de donnée qvec bcrypt*/
+//       const passwordHashed = bcrypt.compareSync(password, user.password);
+//       if (!passwordHashed) {
+//         return res.status(401).json({ message: `Mot de passe incorrect.` });
+//       }
+//       /**Authentifer l'user dans le cookie avec son id personnel */
+//       const token = jwt.sign({ id: user._id }, process.env.token_auth_admin, {
+//         expiresIn: `7d` /**Duréé maximum de vie du token */,
+//       });
+
+//       /* 5 - Envoyer la réponse dans le cookie */
+
+//       res.cookie(String("leguidebj_admin"), token, {
+      
+//         path: `/`, // Chemin du cookie
+//         expires: new Date(Date.now() + 24 * 60 * 60 * 1000 * 7), // Durée de vie du cookie (une semaine)
+//         httpOnly: true, // Accessible uniquement par le serveur HTTP
+//         sameSite: `lax`, // Cross-site
+//         secure: true, // Cookie valable uniquement sur HTTPS
+//     });
+    
+//       /**Réponse finale quand il est authentifié */
+//       return res.status(200).json({ message: `Connection réussie` });
+//     })
+//     .catch((err) => {
+//       return res.status(500).send({
+//         message: `Erreur interne du serveur, veuillez réessayez plus tard ! ${err}`,
+//       });
+//     });
+// });
 module.exports.login_Admin = async_handler(async (req, res) => {
   const { identifier, password } = req.body;
 
-  /*1 - Vérifiez maintenant si les données saisir respecte nos schémas de validation */
+  /* 1 - Vérifiez maintenant si les données saisies respectent nos schémas de validation */
   if (!identifier || !password)
     return res
       .status(401)
       .json({ message: `Veuillez remplir toutes les cases.` });
 
-  /*2- Récuperer l'email ou le numéro de phone pour se connecter */
+  /* 2 - Récupérer l'email ou le numéro de téléphone pour se connecter */
   let existingAdmin;
 
   if (validator.isEmail(identifier)) {
@@ -173,9 +232,10 @@ module.exports.login_Admin = async_handler(async (req, res) => {
     existingAdmin = { tel: identifier };
   } else
     return res.status(400).json({
-      message: `Veuillez saisir un émail ou un numéro de téléphone  valide.`,
+      message: `Veuillez saisir un émail ou un numéro de téléphone valide.`,
     });
-  /**Recuperer la valeur qui passe et le rechercher */
+  
+  /** Recupérer la valeur qui passe et le rechercher */
   Admin.findOne(existingAdmin)
     .then((user) => {
       if (!user)
@@ -183,74 +243,27 @@ module.exports.login_Admin = async_handler(async (req, res) => {
           message: `Vous n'avez pas de compte admin avec ces informations d'identification, veuillez vous inscrire en premier.`,
         });
      
-      /* 3 - Décrypter le mot de passe avant de le vérifiez avec celle de la base de donnée qvec bcrypt*/
+      /* 3 - Décrypter le mot de passe avant de le vérifier avec celle de la base de données avec bcrypt */
       const passwordHashed = bcrypt.compareSync(password, user.password);
       if (!passwordHashed) {
         return res.status(401).json({ message: `Mot de passe incorrect.` });
       }
-      /**Authentifer l'user dans le cookie avec son id personnel */
+      
+      /** Authentifier l'utilisateur en créant un token JWT avec son ID personnel */
       const token = jwt.sign({ id: user._id }, process.env.token_auth_admin, {
-        expiresIn: `7d` /**Duréé maximum de vie du token */,
+        expiresIn: `7d` /** Durée maximum de vie du token */,
       });
 
-      /* 5 - Envoyer la réponse dans le cookie */
-
-      res.cookie(String("leguidebj_admin"), token, {
-      
-        path: `/`, // Chemin du cookie
-        expires: new Date(Date.now() + 24 * 60 * 60 * 1000 * 7), // Durée de vie du cookie (une semaine)
-        httpOnly: true, // Accessible uniquement par le serveur HTTP
-        sameSite: `lax`, // Cross-site
-        secure: true, // Cookie valable uniquement sur HTTPS
-    });
-    
-      /**Réponse finale quand il est authentifié */
-      return res.status(200).json({ message: `Connection réussie` });
+      /**Réponse finale avec le token JWT */
+      return res.status(200).json({ token });
     })
     .catch((err) => {
       return res.status(500).send({
-        message: `Erreur interne du serveur, veuillez réessayez plus tard ! ${err}`,
+        message: `Erreur interne du serveur, veuillez réessayer plus tard ! ${err}`,
       });
     });
 });
 
-
-// module.exports.login_Admin = async_handler(async (req, res) => {
-//   const { identifier, password } = req.body;
-
-//   // Vérification des données saisies
-//   if (!identifier || !password) {
-//     return res.status(401).json({ message: `Veuillez remplir toutes les cases.` });
-//   }
-
-//   // Récupération de l'email ou du numéro de téléphone pour la connexion
-//   let existingAdmin;
-//   if (validator.isEmail(identifier)) {
-//     existingAdmin = { email: identifier };
-//   } else if (validator.isMobilePhone(identifier, 'any')) {
-//     existingAdmin = { tel: identifier };
-//   } else {
-//     return res.status(400).json({ message: `Veuillez saisir un email ou un numéro de téléphone valide.` });
-//   }
-
-//   // Recherche de l'utilisateur dans la base de données
-//   const user = await Admin.findOne(existingAdmin);
-//   if (!user) {
-//     return res.status(401).json({ message: `Vous n'avez pas de compte admin avec ces informations d'identification.` });
-//   }
-
-//   // Vérification du mot de passe
-//   const isPasswordValid = bcrypt.compareSync(password, user.password);
-//   if (!isPasswordValid) {
-//     return res.status(401).json({ message: `Mot de passe incorrect.` });
-//   }
-
-//   // Génération d'un token JWT avec l'ID de l'utilisateur
-//   const token = jwt.sign({ id: user._id }, process.env.token_auth_admin, { expiresIn: '7d' });
-
-//   // Réponse avec le token JWT
-//   return res.status(200).json({ token });
-// });
 
 //4-Déconnexion de la plateforme
 module.exports.logout = async_handler(async (req, res) => {

@@ -4,23 +4,21 @@ const jwt = require("jsonwebtoken");
 const async_handler = require(`express-async-handler`);
 
 module.exports.verify_token_admin = async_handler(async (req, res, next) => {
-  const token = req.cookies.leguidebj_admin;
+  const token = req.headers.authorization;
 
   if (!token) {
     return res.status(401).json({ message: "Vous n'avez pas de token d'authentification" });
   }
 
-  jwt.verify(token, process.env.token_auth_admin, (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ message: "Votre Token est invalide." });
-    }
-
-    // Ajoutez les informations de l'utilisateur au corps de la requête pour y accéder dans les routes suivantes
-    req.user = decoded;
+  try {
+    const decoded = jwt.verify(token, process.env.token_auth_admin);
+    req.user = decoded; // Ajoutez les informations de l'utilisateur au corps de la requête pour y accéder dans les routes suivantes
     next();
-  });
-
+  } catch (error) {
+    return res.status(401).json({ message: "Votre Token est invalide." });
+  }
 });
+
 // module.exports.verify_token_admin = async_handler(async (req, res, next) => {
 //   /**Récuperer le cookie */
 //   const cookies = req.headers.cookie;
