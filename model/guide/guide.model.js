@@ -94,12 +94,9 @@ const guide_schema = mongoose.Schema(
     },
     is_active: {
       type: Boolean,
-      default: false,
+      default: true,
     },
-    is_desactive: {
-      type: Boolean,
-      default: false,
-    },
+   
     date_created: {
       type: Date,
       default: "",

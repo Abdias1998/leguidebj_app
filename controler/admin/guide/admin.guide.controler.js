@@ -158,6 +158,112 @@ module.exports.deleteGuide = async_handler(async (req, res) => {
 });
 
 // 4-Modification du profil des guides
+// module.exports.updateGuide = async_handler(async (req, res) => {
+//   const {
+//     firstName,
+//     lastName,
+//     email,
+//     tel,
+//     country,
+//     zone,
+//     available,experience,
+//     description,
+//     language,
+//   } = req.body;
+//   /**La méthode ObjectId de mongoose pour vérifer si le nombre de caractère est exacte à celle de mongoose */
+//   if (!ObjectdId.isValid(req.params.id))
+//     return res.status(404).send({ messsage: `Utulisateur inconnu` });
+//   /*2 - Vérifiez maintenant si les données saisir respecte notre schéma de validation */
+//   /**Mettre à jour 4 champs(nom,prénom,tel et email) */
+//   if (
+//     validator.isEmpty(firstName) ||
+//     validator.isEmpty(lastName) ||
+//     validator.isEmpty(email) ||
+//     validator.isEmpty(country) ||
+//     validator.isEmpty(zone) ||
+//     validator.isEmpty(description) ||
+//     validator.isEmpty(language) ||
+//     validator.isEmpty(available) ||
+//     validator.isEmpty(experience) ||
+//     validator.isEmpty(tel)
+//   )
+//     return res.status(401).json({
+//       message: `Veuillez remplir touts les champs`,
+//     });
+//   if (
+//     !validator.isLength(firstName, { min: 2, max: 15 }) ||
+//     !validator.isLength(lastName, { min: 2, max: 25 })
+//   )
+//     return res.status(401).json({
+//       message: `Le nom ou le prénom est trop pétit ou trop long`,
+//     });
+//   if (!validator.isEmail(email))
+//     return res
+//       .status(401)
+//       .json({ message: `Votre nouvelle adress email est invalid` });
+
+//   let user;
+//   user = await Guide.findById({ _id: req.params.id });
+//   if (!user)
+//     return res.status(403).json({ messsage: `L'identifiant n'existe pas` });
+
+//   /**Metrre à jour les informatio dans la base de donnéé */
+
+//   /**Si l'email est trouver, lui renvoyé une réponse 403 qu'il est déja pris */
+
+//   let existingUser;
+//   existingUser = await Guide.findOne({ email: email });
+//   if (existingUser && existingUser._id.toString() !== req.params.idGuide)
+//     return res
+//       .status(401)
+//       .json({ message: `Cet émail est déjà utilisé par un utilisateur` });
+//   else
+//     try {
+//       Guide.findByIdAndUpdate(
+//         req.params.idGuide,
+//         {
+//           $set: {
+//             firstName: firstName,
+//             lastName: setAllMajWords(true, lastName),
+//             tel: tel,
+//             email: email,
+//             country: country,
+//             available:available,
+//             is_active:true,
+//             experience:experience,
+//             zone: zone,
+//             description: description,
+//             language: language,
+//             names: `${firstName.toUpperCase()} ${setAllMajWords(
+//               true,
+//               lastName
+//             )}`,
+//             code: codeByCountry(country),
+//           },
+//         },
+//         {
+//           new: true,
+//         },
+//         (err, docs) => {
+//           /**Réponse finale */
+//           if (!err)
+//             return res.status(200).json({
+//               message: "Vos informations sont mises à jours",
+//               docs /**Renvoyer l'user sans son mot de passe */,
+//             });
+//           else
+//             return res.status(401).json({
+//               message: `L'utilisateur avec cet email existe déja, veuillez choisir un autre`,
+//             });
+//         }
+//       ).select(`-password`);
+//     } catch (error) {
+//       return res.status(500).json({
+//         message: `Erreur interne du serveur, veuillez réessayer plus tard !' ${error}`,
+//       });
+//     }
+// });
+
 module.exports.updateGuide = async_handler(async (req, res) => {
   const {
     firstName,
@@ -166,15 +272,15 @@ module.exports.updateGuide = async_handler(async (req, res) => {
     tel,
     country,
     zone,
-    available,experience,
+    available,
+    experience,
     description,
     language,
   } = req.body;
-  /**La méthode ObjectId de mongoose pour vérifer si le nombre de caractère est exacte à celle de mongoose */
+
   if (!ObjectdId.isValid(req.params.id))
-    return res.status(404).send({ messsage: `Utulisateur inconnu` });
-  /*2 - Vérifiez maintenant si les données saisir respecte notre schéma de validation */
-  /**Mettre à jour 4 champs(nom,prénom,tel et email) */
+    return res.status(404).send({ message: `Utilisateur inconnu` });
+
   if (
     validator.isEmpty(firstName) ||
     validator.isEmpty(lastName) ||
@@ -188,90 +294,94 @@ module.exports.updateGuide = async_handler(async (req, res) => {
     validator.isEmpty(tel)
   )
     return res.status(401).json({
-      message: `Veuillez remplir touts les champs`,
+      message: `Veuillez remplir tous les champs`,
     });
+
   if (
     !validator.isLength(firstName, { min: 2, max: 15 }) ||
     !validator.isLength(lastName, { min: 2, max: 25 })
   )
     return res.status(401).json({
-      message: `Le nom ou le prénom est trop pétit ou trop long`,
+      message: `Le nom ou le prénom est trop petit ou trop long`,
     });
+
   if (!validator.isEmail(email))
-    return res
-      .status(401)
-      .json({ message: `Votre nouvelle adress email est invalid` });
+    return res.status(401).json({ message: `Votre nouvelle adresse email est invalide` });
 
-  let user;
-  user = await Guide.findById({ _id: req.params.id });
-  if (!user)
-    return res.status(403).json({ messsage: `L'identifiant n'existe pas` });
+  try {
+    // Vérifier si l'utilisateur existe
+    let user = await Guide.findById(req.params.id);
+    if (!user)
+      return res.status(403).json({ message: `L'identifiant n'existe pas` });
 
-  /**Metrre à jour les informatio dans la base de donnéé */
+    // Vérifier si l'email est déjà utilisé par un autre utilisateur
+    let existingUser = await Guide.findOne({ email: email });
+    if (existingUser && existingUser._id.toString() !== req.params.id)
+      return res.status(401).json({ message: `Cet email est déjà utilisé par un utilisateur` });
 
-  /**Si l'email est trouver, lui renvoyé une réponse 403 qu'il est déja pris */
+    // Mettre à jour les informations dans la base de données
+    user.firstName = firstName;
+    user.lastName = setAllMajWords(true, lastName);
+    user.tel = tel;
+    user.email = email;
+    user.country = country;
+    user.available = available;
+    user.is_active = true;
+    user.experience = experience;
+    user.zone = zone;
+    user.description = description;
+    user.language = language;
+    user.names = `${firstName.toUpperCase()} ${setAllMajWords(true, lastName)}`;
+    user.code = codeByCountry(country);
 
-  let existingUser;
-  existingUser = await Guide.findOne({ email: email });
-  if (existingUser && existingUser._id.toString() !== req.params.idGuide)
-    return res
-      .status(401)
-      .json({ message: `Cet émail est déjà utilisé par un utilisateur` });
-  else
-    try {
-      Guide.findByIdAndUpdate(
-        req.params.idGuide,
-        {
-          $set: {
-            firstName: firstName,
-            lastName: setAllMajWords(true, lastName),
-            tel: tel,
-            email: email,
-            country: country,
-            available:available,
-            experience:experience,
-            zone: zone,
-            description: description,
-            language: language,
-            names: `${firstName.toUpperCase()} ${setAllMajWords(
-              true,
-              lastName
-            )}`,
-            code: codeByCountry(country),
-          },
-        },
-        {
-          new: true,
-        },
-        (err, docs) => {
-          /**Réponse finale */
-          if (!err)
-            return res.status(200).json({
-              message: "Vos informations sont mises à jours",
-              docs /**Renvoyer l'user sans son mot de passe */,
-            });
-          else
-            return res.status(401).json({
-              message: `L'utilisateur avec cet email existe déja, veuillez choisir un autre`,
-            });
-        }
-      ).select(`-password`);
-    } catch (error) {
-      return res.status(500).json({
-        message: `Erreur interne du serveur, veuillez réessayer plus tard !' ${error}`,
-      });
-    }
+    await user.save();
+
+    return res.status(200).json({
+      message: "Les informations du guide sont mises à jour",
+
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: `Erreur interne du serveur, veuillez réessayer plus tard : ${error}`,
+    });
+  }
 });
+
 // 5-Desactivation du profil des guides
-module.exports.diseableGuide = async_handler(async (req, res) => {});
+module.exports.disableGuide = async_handler(async (req, res) => {
+  const { guideId } = req.params; // Supposons que l'ID du guide soit passé en tant que paramètre d'URL
+
+  try {
+    // Recherche du guide par son ID
+    const guide = await Guide.findById(guideId);
+
+    // Vérifie si le guide existe
+    if (!guide) {
+      return res.status(404).json({ message: "Guide non trouvé" });
+    }
+
+    // Désactiver le guide en définissant is_active sur false
+    guide.is_active = false;
+
+    // Enregistrement des modifications
+    await guide.save();
+
+    // Réponse indiquant que le guide a été désactivé avec succès
+    return res.status(200).json({ message: "Guide désactivé avec succès" });
+  } catch (error) {
+    // En cas d'erreur, renvoyer une réponse avec le code d'erreur approprié et un message d'erreur
+    return res.status(500).json({ message: "Erreur lors de la désactivation du guide", error: error.message });
+  }
+});
+
 // 6-Activation du profil des guides
 module.exports.activateGuide = async_handler(async (req, res) => {
-  /*Vérifiez si c'est l'admin qui crée l'utilisateur*/
+  
 });
 // 7-La liste des guides
 module.exports.get_all_guide = async_handler(async (req, res) => {
   try {
-    const users = await Guide.find().select('-password');
+    const users = await Guide.find().select('-password').sort({ createdAt: -1 });
     res.send(users);
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -368,7 +478,7 @@ module.exports.sendPdfListe = async_handler(async (req, res) => {
     `;
 
     send_email(
-      process.env.userAdmin,
+      process.env.emailAdmin,
       `Liste des Guides de la plateforme : LE GUIDE BJ`,
       tableHTML
     );

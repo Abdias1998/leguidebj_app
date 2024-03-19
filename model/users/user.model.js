@@ -13,7 +13,7 @@ const userSchema = mongoose.Schema(
 
     password: {
       type: String,
-      required: true,
+      required: true, 
     },
     email: {
       type: String,
@@ -45,6 +45,10 @@ const userSchema = mongoose.Schema(
     phoneType: {
       type: String,
       default: "",
+    },
+    isAdmin: {
+      type: Boolean,
+      default:false,
     },
     user_banned: {
       type: Boolean,

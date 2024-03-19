@@ -5,7 +5,7 @@ const { send_email } = require("../../../utils/send.email");
 const ObjectdId = mongoose.Types.ObjectId;
 module.exports.get_all_users = async_handler(async (req, res) => {
   try {
-    const users = await Users.find().select('-password');
+    const users = await Users.find().select('-password').sort({ createdAt: -1 });
     res.send(users);
   } catch (error) {
     console.error('Error fetching users:', error);

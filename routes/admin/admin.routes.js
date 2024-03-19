@@ -100,12 +100,12 @@ router.delete(
 ); //ok
 router.get(
   "/get-guides-by-year",
-  admin_middleware.verify_token_admin,
+  // admin_middleware.verify_token_admin,
   admin_guide_controler.get_guides_by_year
 ); //ok
 router.get(
   "/get-users-by-year",
-  admin_middleware.verify_token_admin,
+  // admin_middleware.verify_token_admin,
   admin_guide_controler.get_users_by_year
 ); //ok
 // Mettre à jour un guide
@@ -134,6 +134,12 @@ router.get(
   "/get_all_guides_active!",
   admin_middleware.verify_token_admin,
   admin_guide_controler.get_active_and_diseable
+); //ok
+//Désactiver un guide
+router.put(
+  "/disebale-guide/:guideId",
+  admin_middleware.verify_token_admin,
+  admin_guide_controler.disableGuide
 ); //ok
 
 // Envoyer la liste des guides

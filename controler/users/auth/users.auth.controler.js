@@ -1,4 +1,62 @@
+/* global process */
+// /* global __dirname */
+const async_handler = require('express-async-handler')
+const validator = require('validator');
+const userModel = require('../../../model/users/user.model');
+const bcrypt= require('bcrypt')
+// 1-Inscription de l'admin principal
+module.exports.registerUser  = async_handler(async (req, res) => {
+  const { email, name, password } = req.body;
+
+  // Verifier si les données saisit sont valide et non vide
+  if (!validator.isEmail(email))
+    return res.status(401).json({ message: "Saisissez un mail valide" });
+  if (!validator.isLength(password, { min: 4, max: 30 }))
+    return res.status(401).json({
+      message:
+        "La longeur de caractère du mot de passe doit être comprise entre 8 et 30",
+    });
+  
+
+  // Vérifier si le mail de l'user ou son tel existe déja
+  let user;
+  try {
+    user = await userModel.findOne({email});
+  } catch (error) {
+    return res.status(500).json({ message: `Erreur interne du serveur` });
+  }
+
+  // Renvoyer une erreur 403 si l'email ou le tel est trouver
+  if (user)
+    return res.status(403).json({
+      message: `L'utilisateur avec cet email ou télephone existe déjà !`,
+    });
+
+  // Crypter le mot de passe
+  const hashed_password = bcrypt.hashSync(password, 10);
+
+  try {
+    //   Enrégistrer l'utilisateur
+    const user = await new userModel({
+      email,
+      name,
+      password: hashed_password,
+      isAdmin: false,
+   
+    });
+    user.save();
+    return res.status(200).json({
+      message: "Inscription réussie",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: `Erreur interne du serveur, veuillez réessayez plus tard! ${error}`,
+    });
+  }
+});
 //3-Connexion de l'administrateur
+
+
 module.exports.login_Admin = async_handler(async (req, res) => {
     const { identifier, password } = req.body;
   
@@ -11,7 +69,7 @@ module.exports.login_Admin = async_handler(async (req, res) => {
     /*2- Récuperer l'email ou le numéro de phone pour se connecter */
     let existingAdmin;
   
-    if (validator.isEmail(identifier)) {
+    if (validator.isEmail(identifier)) { 
       existingAdmin = { email: identifier }; /**Accepte si c'est un email */
     } else if (validator.isMobilePhone(identifier, `any`)) {
       /**Acccepte si c'est un numéro de n'importe quel pays c'est pourquoi on à 'any' comme seconde valeur */

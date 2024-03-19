@@ -10,7 +10,8 @@ const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const admin_route = require("./routes/admin/admin.routes");
-const fs = require('fs')
+const users_route = require("./routes/users/users.routes");
+// const fs = require('fs')
 const app = express();
 const port = process.env.port;
 const client_url = process.env.client_url;
@@ -22,26 +23,27 @@ app.use(helmet());
 app.use(cors({ credentials: true, origin: client_url}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "./frontend/build")));
+app.use(express.static(path.join(__dirname, "./client")));
 app.get(["/"], function (req, res) {
-  res.sendFile(path.join(__dirname, "./frontend/build", "index.html"));
+  res.sendFile(path.join(__dirname, "./client", "index.html"));
 });
 app.use(
-  express.static(path.join(__dirname, "./frontend/build/assets/guide/document"))
+  express.static(path.join(__dirname, "./client/assets/guide/document"))
 );
 
-app.get("/frontend/build/assets/guide/document/:filename", (req, res) => {
+app.get("/client/assets/guide/document/:filename", (req, res) => {
   const filename = req.params.filename;
   // Récupérer le chemin complet de l'image
   const imagePath = path.join(
     __dirname,
-    "./frontend/build/assets/guide/document",
+    "./client/assets/guide/document",
     filename
   );
   // Renvoyer l'image au client
   res.sendFile(imagePath);
 }); 
 app.use("/v1/admin", admin_route);
+app.use("/v1/users", users_route);
 app.listen(port, () => {
   console.log(`Le serveur est démarrer sur le port ${port}`);
 });

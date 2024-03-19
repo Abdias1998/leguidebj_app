@@ -216,9 +216,9 @@ module.exports.login_Admin = async_handler(async (req, res) => {
         expires: new Date(
           Date.now() + 24 * 60 * 60 * 1000 * 7
         ) /**Durée de vie du cookie qui est de 3 jours */,
-        // httpOnly: true, //Only server
-        // sameSite: `lax`, //cross site, empêcher les réquêtes d'autres domaines
-        // secure: true, // https
+        httpOnly: true, //Only server
+        sameSite: `lax`, //cross site, empêcher les réquêtes d'autres domaines
+        secure: true, // https
       });
 
       /**Réponse finale quand il est authentifié */
@@ -252,6 +252,6 @@ module.exports.logout = async_handler(async (req, res) => {
     req.cookies = req.cookies || {};
     req.cookies[`leguidebj_admin`] = ``;
     /**Réponse finale */
-    return res.status(200).json({ message: `Déconnexion` });
+    return res.status(200).json({ message: `Déconnexion` }); 
   });
 });

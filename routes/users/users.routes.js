@@ -1,5 +1,7 @@
 const router = require("express").Router();
 const users_controler = require("../../controler/users/users.controler");
-// Recuperer touts les users
-router.get("/", users_controler.get_all_users);
+const users_auth = require("../../controler/users/auth/users.auth.controler");
+// Insription 
+router.post("/register", users_auth.registerUser);
+// Recuperer les users
 module.exports = router;
