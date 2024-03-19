@@ -1,0 +1,18 @@
+{
+  "/admin/auth/login": "pages/admin/auth/login.html",
+  "/_app": "pages/_app.js",
+  "/_document": "pages/_document.js",
+  "/_error": "pages/_error.js",
+  "/admin/auth/register": "pages/admin/auth/register.html",
+  "/404": "pages/404.html",
+  "/admin/dashboard": "pages/admin/dashboard.html",
+  "/admin/circuit": "pages/admin/circuit.html",
+  "/admin/blog": "pages/admin/blog.html",
+  "/admin/destination": "pages/admin/destination.html",
+  "/admin/guides": "pages/admin/guides.html",
+  "/admin/settings": "pages/admin/settings.html",
+  "/admin/manager": "pages/admin/manager.html",
+  "/": "pages/index.html",
+  "/admin/users": "pages/admin/users.html",
+  "/admin/account": "pages/admin/account.html"
+}
