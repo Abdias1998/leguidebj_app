@@ -7,12 +7,13 @@ module.exports.verify_token_admin = async_handler(async (req, res, next) => {
   /**Récuperer le cookie */
   const cookies = req.headers.cookie;
   const token = cookies?.split("=")[1];
+  console.log(token);
   /**Si aucun n'existe, renvoyer une erreur  */
   try {
     if (!token) {
       return res
         .status(404)
-        .json({ message: "Vous n'avez pas de token d'authentification" });
+        .json({ message: "Vous n'avez pas de token d'authentification" +token});
     }
   } catch (error) {
     return res.status(500).json({
