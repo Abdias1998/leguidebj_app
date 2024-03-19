@@ -214,7 +214,7 @@ module.exports.login_Admin = async_handler(async (req, res) => {
       res.cookie(String("leguidebj_admin"), token, {
         path: `/`, // Chemin du cookie
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000 * 7), // Durée de vie du cookie (une semaine)
-        httpOnly: true, // Accessible uniquement par le serveur HTTP
+        // httpOnly: true, // Accessible uniquement par le serveur HTTP
         sameSite: `lax`, // Cross-site
         secure: true, // Cookie valable uniquement sur HTTPS
     });
