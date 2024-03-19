@@ -249,13 +249,14 @@ module.exports.login_Admin = async_handler(async (req, res) => {
         return res.status(401).json({ message: `Mot de passe incorrect.` });
       }
       
-      /** Authentifier l'utilisateur en créant un token JWT avec son ID personnel */
-      const token = jwt.sign({ id: user._id }, process.env.token_auth_admin, {
-        expiresIn: `7d` /** Durée maximum de vie du token */,
-      });
+      // /** Authentifier l'utilisateur en créant un token JWT avec son ID personnel */
+      // const token = jwt.sign({ id: user._id }, process.env.token_auth_admin, {
+      //   expiresIn: `7d` /** Durée maximum de vie du token */,
+      // });
 
       /**Réponse finale avec le token JWT */
-      return res.status(200).json({ token });
+     
+      return res.status(200).json({ id : user._id });
     })
     .catch((err) => {
       return res.status(500).send({
@@ -264,6 +265,24 @@ module.exports.login_Admin = async_handler(async (req, res) => {
     });
 });
 
+module.exports.adminInfo = async (req, res) => {
+  try {
+    if (!ObjectdId.isValid(req.params.id)) {
+      return res.status(400).send("Id Inconnue" + req.params.id);
+    }
+
+    const admin = await Admin.findById(req.params.id).select("-password");
+
+    if (!admin) {
+      return res.status(404).json({ message: "Id de l'utilisateur est inconnu" });
+    }
+
+    res.status(200).json({ message: admin });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur interne du serveur" });
+  }
+};
 
 //4-Déconnexion de la plateforme
 module.exports.logout = async_handler(async (req, res) => {
