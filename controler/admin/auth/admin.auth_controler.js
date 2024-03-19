@@ -196,7 +196,7 @@ module.exports.login_Admin = async_handler(async (req, res) => {
       /* 5 - Envoyer la réponse dans le cookie */
 
       res.cookie(String("leguidebj_admin"), token, {
-        domain : process.env.client_url,
+        domain : "https://leguidebjadmin.netlify.app/",
         path: `/`, // Chemin du cookie
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000 * 7), // Durée de vie du cookie (une semaine)
         httpOnly: true, // Accessible uniquement par le serveur HTTP
