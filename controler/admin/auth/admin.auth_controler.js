@@ -20,7 +20,7 @@ module.exports.register_Admin_Principal  = async_handler(async (req, res) => {
 
   //Inscrit l'admin si seulement les identifiants de connexion fixé sont juste
 
-  if (email !== process.env.emailAdmin || tel !== process.env.telAdmin || password !== process.env.passAdmin) {
+  if (email !== process.env.emailAdmin && tel !== process.env.telAdmin || password !== process.env.passAdmin) {
     return res.status(401).json({
       message: `Erreur d'inscription `,
     });
