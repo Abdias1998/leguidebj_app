@@ -14,7 +14,7 @@ const ObjectdId = mongoose.Types.ObjectId;
 //1- Récuperer touts les admins
 module.exports.get_all_admin = async_handler(async (req, res) => {
   try {
-    const users = await Admin.find().select('-password').sort({ createdAt: -1 }); 
+    const users = await Admin.find().select('-password -isAdminPrincipal').sort({ createdAt: -1 }); // Exclure le champ isAdminPrincipal de la réponse
     res.send(users);
   } catch (error) {
     console.error('Error fetching users:', error);

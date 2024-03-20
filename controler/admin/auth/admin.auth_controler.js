@@ -218,57 +218,56 @@ module.exports.login_Admin = async_handler(async (req, res) => {
 
   /* 1 - Vérifiez maintenant si les données saisies respectent nos schémas de validation */
   if (!identifier || !password)
-    return res
-      .status(401)
-      .json({ message: `Veuillez remplir toutes les cases.` });
+      return res.status(401).json({ message: `Veuillez remplir toutes les cases.` });
 
   /* 2 - Récupérer l'email ou le numéro de téléphone pour se connecter */
   let existingAdmin;
 
   if (validator.isEmail(identifier)) {
-    existingAdmin = { email: identifier }; /**Accepte si c'est un email */
+      existingAdmin = { email: identifier }; /**Accepte si c'est un email */
   } else if (validator.isMobilePhone(identifier, `any`)) {
-    /**Acccepte si c'est un numéro de n'importe quel pays c'est pourquoi on à 'any' comme seconde valeur */
-    existingAdmin = { tel: identifier };
-  } else
-    return res.status(400).json({
-      message: `Veuillez saisir un émail ou un numéro de téléphone valide.`,
-    });
-  
+      /**Acccepte si c'est un numéro de n'importe quel pays c'est pourquoi on à 'any' comme seconde valeur */
+      existingAdmin = { tel: identifier };
+  } else {
+      return res.status(400).json({
+          message: `Veuillez saisir un émail ou un numéro de téléphone valide.`,
+      });
+  }
+
   /** Recupérer la valeur qui passe et le rechercher */
   Admin.findOne(existingAdmin)
-    .then((user) => {
-      if (!user)
-        return res.status(401).json({
-          message: `Vous n'avez pas de compte admin avec ces informations d'identification, veuillez vous inscrire en premier.`,
-        });
-     
-      /* 3 - Décrypter le mot de passe avant de le vérifier avec celle de la base de données avec bcrypt */
-      const passwordHashed = bcrypt.compareSync(password, user.password);
-      if (!passwordHashed) {
-        return res.status(401).json({ message: `Mot de passe incorrect.` });
-      }
-      
-      // /** Authentifier l'utilisateur en créant un token JWT avec son ID personnel */
-      // const token = jwt.sign({ id: user._id }, process.env.token_auth_admin, {
-      //   expiresIn: `7d` /** Durée maximum de vie du token */,
-      // });
+      .then((user) => {
+          if (!user)
+              return res.status(401).json({
+                  message: `Vous n'avez pas de compte admin avec ces informations d'identification, veuillez vous inscrire en premier.`,
+              });
 
-      /**Réponse finale avec le token JWT */
-     
-      return res.status(200).json({ id : user._id });
-    })
-    .catch((err) => {
-      return res.status(500).send({
-        message: `Erreur interne du serveur, veuillez réessayer plus tard ! ${err}`,
+          /* 3 - Décrypter le mot de passe avant de le vérifier avec celle de la base de données avec bcrypt */
+          const passwordHashed = bcrypt.compareSync(password, user.password);
+          if (!passwordHashed) {
+              return res.status(401).json({ message: `Mot de passe incorrect.` });
+          }
+
+          // /** Authentifier l'utilisateur en créant un token JWT avec son ID personnel */
+          const token = jwt.sign({ id: user._id }, process.env.token_auth_admin, {
+              expiresIn: `7d` /** Durée maximum de vie du token */,
+          });
+
+          /**Réponse finale avec le token JWT et l'objet isAuthenticated */
+          return res.status(200).json({ authenticated: true, id: token });
+      })
+      .catch((err) => {
+          return res.status(500).send({
+              message: `Erreur interne du serveur, veuillez réessayer plus tard ! ${err}`,
+          });
       });
-    });
 });
+
 
 module.exports.adminInfo = async (req, res) => {
   try {
     if (!ObjectdId.isValid(req.params.id)) {
-      return res.status(400).send("Id Inconnue" + req.params.id);
+      return res.status(400).json({message : "Id inconnue" });
     }
 
     const admin = await Admin.findById(req.params.id).select("-password");
