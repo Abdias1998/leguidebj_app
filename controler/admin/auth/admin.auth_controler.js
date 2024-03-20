@@ -256,7 +256,7 @@ module.exports.login_Admin = async_handler(async (req, res) => {
           const idGenerer2 = generateRandomCodeTwo()
 const idFake = `${idGenerer1+user._id+idGenerer2 }`
           /**Réponse finale avec le token JWT et l'objet isAuthenticated */
-          console.log(idFake);
+          // console.log(idFake);
           return res.status(200).json({  id: idFake });
       })
       .catch((err) => {
