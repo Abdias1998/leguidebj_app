@@ -118,6 +118,7 @@ module.exports.createGuide = async_handler(async (req, res) => {
         } else {
           const html = data
             .replace(/{names}/g, `${firstName-lastName}`)
+            .replace(/{lastName}/g, `${lastName}`)
             .replace(/{zone}/g, zone)
             .replace(/{language}/g, language)
             .replace(/{country}/g, country)

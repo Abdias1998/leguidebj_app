@@ -4,7 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienvenue dans notre communauté de guides locaux !</title>
-</head>
+    <style>
+        .card {
+          border: 1px solid #ccc;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          margin: 20px auto;
+          max-width: 400px;
+          padding: 20px;
+        }
+    
+        .card-header {
+          background-color: #007bff;
+          border-radius: 8px 8px 0 0;
+          color: #fff;
+          font-size: 18px;
+          padding: 10px 20px;
+          text-align: center;
+        }
+    
+        .card-body {
+          padding: 20px;
+        }
+    
+        .card-title {
+          font-size: 24px;
+          margin-bottom: 10px;
+        }
+    
+        .card-text {
+          font-size: 16px;
+          margin-bottom: 5px;
+        }
+      </style>
+    </head>
+    
 <body style="font-family: Arial, sans-serif;">
 
     <h1 style="color: #007bff;">Bienvenue dans notre communauté de guides locaux !</h1>
@@ -15,15 +49,21 @@
 
     <p>Voici un récapitulatif des informations que vous avez fournies lors de votre inscription :</p>
 
-    <ul>
-        <li><strong>Nom complet :</strong> {names}</li>
-        <li><strong>Adresse e-mail :</strong> {email}</li>
-        <li><strong>Téléphone :</strong> {tel}</li>
-        <li><strong>Pays :</strong> {country}</li>
-        <li><strong>Zone touristique :</strong>{zone}</li>
-        <li><strong>Langue :</strong> {language}</li>
-        <li><strong>Description :</strong>{description}</li>
-    </ul>
+    <div class="card">
+        <div class="card-header">
+          Informations du guide
+        </div>
+        <div class="card-body">
+          <p class="card-text">{Prénom} {Nom}</p>
+          <p class="card-text">Email : {email}</p>
+          <p class="card-text">Téléphone : {tel}</p>
+          <p class="card-text">Pays : {country}</p>
+          <p class="card-text">Zone touristique : {zone}</p>
+          <p class="card-text">Langue : {language}</p>
+          <p class="card-text">Description : {description}</p>
+        </div>
+      </div>
+      
 
     <p>Nous vous recommandons de vérifier attentivement ces informations. Si vous remarquez des erreurs ou si vous avez besoin de mettre à jour certaines informations, veuillez nous contacter dès que possible.</p>
 <!-- 
