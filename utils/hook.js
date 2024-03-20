@@ -144,3 +144,23 @@ module.exports.codeByCountry = (country) => {
   default: return "Indicatif non trouvé" 
   }
 };
+
+module.exports.generateRandomCode =()=> {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    code += characters[randomIndex];
+  }
+  return code;
+}
+module.exports.generateRandomCodeTwo =()=> {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    code += characters[randomIndex];
+  }
+  return code;
+}
+

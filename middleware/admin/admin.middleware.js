@@ -85,3 +85,23 @@ module.exports.get_admin_info = async_handler(async (req, res) => {
 //     res.status(404).json({ message: `L'utilisateur n'existe pas ${error}` });
 //   }
 // });
+
+
+module.exports.verifyAdmin = async_handler(async(req,res,next) =>{
+  const { id } = req.params;
+
+  try {
+    const user = await Admin.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "L'utilisateur n'existe pas" });
+    }
+
+    // Si l'utilisateur existe, vous pouvez le stocker dans la requête pour une utilisation ultérieure si nécessaire
+    req.user = user;
+    next(); // Passez à la prochaine fonction middleware ou à la route appropriée
+  } catch (error) {
+    console.error('Erreur lors de la recherche de l\'utilisateur :', error);
+    return res.status(500).json({ message: "Erreur interne du serveur" });
+  }
+})

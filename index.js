@@ -42,6 +42,7 @@ app.get("/frontend/build/assets/guide/document/:filename", (req, res) => {
   // Renvoyer l'image au client
   res.sendFile(imagePath);
 }); 
+
 app.use("/v1/admin", admin_route);
 app.use("/v1/users", users_route);
 app.listen(port, () => {

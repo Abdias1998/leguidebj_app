@@ -12,7 +12,7 @@ const ObjectdId = mongoose.Types.ObjectId;
 // const sendEmail = sendEmail_request.send_email;
 
 const jwt = require("jsonwebtoken");
-const { generateCode } = require("../../../utils/hook");
+const { generateCode, generateRandomCode, generateRandomCodeTwo } = require("../../../utils/hook");
 
 // 1-Inscription de l'admin principal
 module.exports.register_Admin_Principal  = async_handler(async (req, res) => {
@@ -252,9 +252,12 @@ module.exports.login_Admin = async_handler(async (req, res) => {
           const token = jwt.sign({ id: user._id }, process.env.token_auth_admin, {
               expiresIn: `7d` /** Durée maximum de vie du token */,
           });
-
+          const idGenerer1 = generateRandomCode()
+          const idGenerer2 = generateRandomCodeTwo()
+const idFake = `${idGenerer1+user._id+idGenerer2 }`
           /**Réponse finale avec le token JWT et l'objet isAuthenticated */
-          return res.status(200).json({ authenticated: true, id: token });
+          console.log(idFake);
+          return res.status(200).json({  id: idFake });
       })
       .catch((err) => {
           return res.status(500).send({
