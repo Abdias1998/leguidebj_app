@@ -146,6 +146,12 @@ router.put(
   // admin_middleware.verify_token_admin,
   admin_guide_controler.disableGuide
 ); //ok
+//Activer un guide
+router.put(
+  "/active-guide/:guideId",
+  // admin_middleware.verify_token_admin,
+  admin_guide_controler.activeGuide
+); //ok
 
 // Envoyer la liste des guides
 router.get(

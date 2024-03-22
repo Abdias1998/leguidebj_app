@@ -374,11 +374,34 @@ module.exports.disableGuide = async_handler(async (req, res) => {
     return res.status(500).json({ message: "Erreur lors de la désactivation du guide", error: error.message });
   }
 });
+// 5-Activation du profil des guides
+module.exports.activeGuide = async_handler(async (req, res) => {
+  const { guideId } = req.params; // Supposons que l'ID du guide soit passé en tant que paramètre d'URL
 
-// 6-Activation du profil des guides
-module.exports.activateGuide = async_handler(async (req, res) => {
-  
+  try {
+    // Recherche du guide par son ID
+    const guide = await Guide.findById(guideId);
+
+    // Vérifie si le guide existe
+    if (!guide) {
+      return res.status(404).json({ message: "Guide non trouvé" });
+    }
+
+    // Désactiver le guide en définissant is_active sur false
+    guide.is_active = true;
+
+    // Enregistrement des modifications
+    await guide.save();
+
+    // Réponse indiquant que le guide a été activé avec succès
+    return res.status(200).json({ message: "Guide activé avec succès" });
+  } catch (error) {
+    // En cas d'erreur, renvoyer une réponse avec le code d'erreur approprié et un message d'erreur
+    return res.status(500).json({ message: "Erreur lors de l'activation du guide", error: error.message });
+  }
 });
+
+
 // 7-La liste des guides
 module.exports.get_all_guide = async_handler(async (req, res) => {
   try {
