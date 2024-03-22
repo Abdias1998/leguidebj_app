@@ -10,9 +10,9 @@ const admin_users_controler = require("../../controler/admin/users/admin.users.c
 const admin_middleware = require("../../middleware/admin/admin.middleware");
 const multer = require("multer");
 
-const storages = multer.diskStorage({
+const storages = multer.diskStorage({ 
   destination: (req, file, cb) => {
-    cb(null, "./client/assets/guide/document");
+    cb(null, "./images/guide");
   },
   filename: (req, file, cb) => {
     cb(null, `${file.originalname}`);
@@ -97,7 +97,7 @@ router.post(
   admin_guide_controler.createGuide
 ); //ok
 
-// Supprimer un guide
+// Supprimer un guide 
 router.delete(
   "/delete_guide/:id",
   // admin_middleware.verify_token_admin,

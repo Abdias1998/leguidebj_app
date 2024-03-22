@@ -28,15 +28,15 @@ app.get(["/"], function (req, res) {
   res.sendFile(path.join(__dirname, "./frontend/build", "index.html"));
 });
 app.use(
-  express.static(path.join(__dirname, "./frontend/build/assets/guide/document"))
+  express.static(path.join(__dirname, "./images/guide"))
 );
 
-app.get("/frontend/build/assets/guide/document/:filename", (req, res) => {
+app.get("/images/guide/:filename", (req, res) => {
   const filename = req.params.filename;
   // Récupérer le chemin complet de l'image
   const imagePath = path.join(
     __dirname,
-    "./frontend/build/assets/guide/document",
+    "./images/guide",
     filename
   );
   // Renvoyer l'image au client

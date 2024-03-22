@@ -31,7 +31,7 @@ module.exports.createGuide = async_handler(async (req, res) => {
 
   /**Envoyer les données dans notre base de donnée */
   const document = req.files?.map(
-    (file) => `${process.env.client_url}/document/${file.originalname}`
+    (file) => `${process.env.backend_url}/images/guide/${file.originalname}`
   );
   if (
     validator.isEmpty(firstName) ||
@@ -54,7 +54,7 @@ module.exports.createGuide = async_handler(async (req, res) => {
     !validator.isLength(lastName, { min: 2, max: 25 })
   )
     return res.status(401).json({
-      message: `Le nom ou le prénom est trop pétit ou trop long`,
+      message:  `Le nom ou le prénom est trop pétit ou trop long`,
     });
 
   const date = new Date(); // crée un objet Date avec la date et l'heure actuelles
@@ -128,7 +128,7 @@ module.exports.createGuide = async_handler(async (req, res) => {
             .replace(/{available }/g, available )
             .replace(/{description}/g, description);
 
-          send_email(email, `Connexion au compte admin`, html);
+          send_email(email, `Inscription au plateforme Le Guide BJ`, html);
         }
       });
       return res.status(201).json({
