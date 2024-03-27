@@ -31,6 +31,9 @@ app.get(["/"], function (req, res) {
 app.use(
   express.static(path.join(__dirname, "./images/guide"))
 );
+app.use(
+  express.static(path.join(__dirname, "./images/destination"))
+);
 
 app.get("/images/guide/:filename", (req, res) => {
   const filename = req.params.filename;
@@ -38,6 +41,17 @@ app.get("/images/guide/:filename", (req, res) => {
   const imagePath = path.join(
     __dirname,
     "./images/guide",
+    filename
+  );
+  // Renvoyer l'image au client
+  res.sendFile(imagePath);
+}); 
+app.get("/images/destination/:filename", (req, res) => {
+  const filename = req.params.filename;
+  // Récupérer le chemin complet de l'image
+  const imagePath = path.join(
+    __dirname,
+    "./images/destination",
     filename
   );
   // Renvoyer l'image au client
