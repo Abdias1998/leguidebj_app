@@ -6,7 +6,7 @@ const async_handler = require(`express-async-handler`);
 const mongoose = require("mongoose");
 const { setAllMajWords } = require("../../utils/hook");
 const validator = require("validator");
-const ObjectdId = mongoose.Types.ObjectId;
+
 
 //3- Recuperer touts les guides
 module.exports.get_all_guide = async_handler(async (req, res) => {

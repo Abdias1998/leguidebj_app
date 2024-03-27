@@ -11,6 +11,7 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const admin_route = require("./routes/admin/admin.routes");
 const users_route = require("./routes/users/users.routes");
+const destination_route = require("./routes/destination/destination.routes");
 const fs = require('fs')
 const app = express();
 const port = process.env.port;
@@ -45,6 +46,7 @@ app.get("/images/guide/:filename", (req, res) => {
 
 app.use("/v1/admin", admin_route);
 app.use("/v1/users", users_route);
+app.use("/v1/destination", destination_route);
 app.listen(port, () => {
   console.log(`Le serveur est démarrer sur le port ${port}`);
 });

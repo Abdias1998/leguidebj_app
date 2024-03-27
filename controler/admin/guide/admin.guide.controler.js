@@ -327,7 +327,7 @@ module.exports.updateGuide = async_handler(async (req, res) => {
     user.email = email;
     user.country = country;
     user.available = available;
-    user.is_active = true;
+    // user.is_active = true;
     user.experience = experience;
     user.zone = zone;
     user.description = description;
