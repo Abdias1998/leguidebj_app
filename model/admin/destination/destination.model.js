@@ -7,7 +7,7 @@ const destination_schema = mongoose.Schema(
       type: String,
    
       trim: true,
-      lowercase: true,  required: true,
+      uppercase: true,  required: true,
      
     },
     texte: {
