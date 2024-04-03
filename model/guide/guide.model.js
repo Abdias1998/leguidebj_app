@@ -84,6 +84,7 @@ const guide_schema = mongoose.Schema(
         },
       ],
     },
+    count: { type: Number, default: 0 },
     available: {
       type: String,
       required: true,

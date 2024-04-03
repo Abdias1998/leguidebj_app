@@ -126,6 +126,18 @@ router.get(
   // admin_middleware.verify_token_admin,
   admin_guide_controler.get_all_guide
 ); //ok
+// Incrementer un guide
+router.put(
+  "/increment_guides/:id",
+  // admin_middleware.verify_token_admin,
+  admin_guide_controler.incrementGuide
+); //ok
+// Recuperer l'increment des guides
+router.get(
+  "/get_max_increment_guides",
+  // admin_middleware.verify_token_admin,
+  admin_guide_controler.getMaxIncrementGuide
+); //ok
 
 
 // le nombre total de commentaire pour touts les guides
@@ -152,13 +164,20 @@ router.put(
   // admin_middleware.verify_token_admin,
   admin_guide_controler.activeGuide
 ); //ok
-
+// Les infos d'un guide
+router.get(
+  "/get_info_guide/:id",
+  // admin_middleware.verify_token_admin,
+  admin_guide_controler.getInfoGuidde
+);                    
 // Envoyer la liste des guides
 router.get(
   "/send_pdf_all_guide",
   // admin_middleware.verify_token_admin,
   admin_guide_controler.sendPdfListe
 );
+
+
 // Les utilisateurs
 // Recuperer les utilisateurs
 router.get(

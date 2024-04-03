@@ -574,6 +574,44 @@ module.exports.get_users_by_year = async_handler(async(req,res)=>{
     res.status(500).json({ message: 'Internal server error' });
   }
 })
+
+
+module.exports.getInfoGuidde = async_handler(async(req,res)=>{
+  const {id} = req.params
+
+  try {
+    const guide = await Guide.findById(id);
+    return res.status(201).json(guide)
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+})
+module.exports.incrementGuide = async_handler(async(req,res,)=>{
+  const {id} = req.params
+
+  try {
+    const guide = await Guide.findById(id);
+ if(!guide) return res.status(400).json({message :'Erreur,veuillez réesayer plus tard !'})
+   // Incrémenter le compteur
+   guide.count++;
+   await guide.save();
+ return res.send('Increment')
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+})
+module.exports.getMaxIncrementGuide = async_handler(async (req, res) => {
+  try {
+    // Trouver tous les guides triés par count dans l'ordre croissant
+    const guides = await Guide.find().sort({ count: -1 });
+    res.status(200).json({ guides });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de la récupération des guides' });
+  }
+});
+
+
+
 // 8-Afficher les commentaires des users sur les guides
 
 // 9-Supprimer les commentaires des users sur les guides
